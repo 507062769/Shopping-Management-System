@@ -11,6 +11,11 @@ const ClassificationService = {
       where: { dflID: id },
     });
   },
+  getXFLList: async (id) => {
+    return XFL.findAll({
+      where: { zflID: id },
+    });
+  },
 };
 
 module.exports = ClassificationService;

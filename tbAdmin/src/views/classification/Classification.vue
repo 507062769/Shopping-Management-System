@@ -83,9 +83,13 @@ export default {
     methods: {
 
         getClassification() {
-            console.log("已经调用了getLI");
             this.$axios.get('/adminAPI/classification/list').then(res => {
-                console.log("请求成功：", res);
+                console.log("请求成功：", res.data.data);
+                let data = res.data.data
+                for (let item in data) {
+                    data[item]["children"] = JSON.parse(data[item]["children"]);
+                }
+                console.log("最终数据：", data);
             })
         },
 

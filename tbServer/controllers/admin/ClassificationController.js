@@ -4,49 +4,34 @@ require("../../util/JWT");
 
 const ClassificationController = {
   getList: async (req, res) => {
-    let classificationData = [];
+    let classificationData;
+    await ClassificationService.getDFLList().then(async (res) => {
+      classificationData = JSON.parse(JSON.stringify(res));
+      for (let key in classificationData) {
+        await ClassificationService.getZFLList(
+          classificationData[key]["dflID"]
+        ).then(async (res) => {
+          classificationData[key]["children"] = JSON.stringify(res);
 
-    getDflList(classificationData);
-
-    setInterval(() => {
-      console.log("！！！！", classificationData);
-    }, 1000);
-    // console.log("classificationData:", getDflList(classificationData));
-
-    // let a = await ClassificationService.getZFLList(
-    //     classificationData[index].dflID
-    //   );
-    //   classificationData[index]["children"] = arrToObj(a);
-
-    // console.log("最终结果为", classificationData);
-    // res.send({
-    //   code: "200",
-    //   msg: "成功",
-    //   data: classificationData,
-    // });
-    res.send({
-      code: "200",
-      msg: "成功",
-      data: classificationData,
+          for (let i in JSON.parse(classificationData[key]["children"])) {
+            await ClassificationService.getXFLList(
+              JSON.parse(classificationData[key]["children"])[i]["zflID"]
+            ).then((res) => {
+              JSON.parse(classificationData[key]["children"])[i]["children"] = {
+                xx: 1,
+              };
+              console.log(
+                "看看：",
+                JSON.parse(classificationData[key]["children"])[i]["children"]
+              );
+            });
+          }
+        });
+      }
+      // console.log("~~~:", classificationData);
     });
+    // console.log("数据：", classificationData);
   },
 };
-
-function arrToObj(arr) {
-  let obj = [];
-  arr.forEach((item, i) => {
-    obj.push(item.dataValues);
-  });
-  return JSON.stringify(obj);
-}
-
-async function getDflList(obj) {
-  const result = await ClassificationService.getDFLList();
-  result.forEach((item, index) => {
-    obj.push(item.dataValues);
-  });
-  console.log("@@", obj);
-  //   return obj;
-}
 
 module.exports = ClassificationController;
