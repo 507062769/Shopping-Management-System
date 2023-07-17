@@ -7,4 +7,9 @@ ClassificationRoute.get(
   ClassificationController.getList
 );
 
+ClassificationRoute.post(
+  "/classification/addClass",
+  ClassificationController.addClass
+);
+
 module.exports = ClassificationRoute;

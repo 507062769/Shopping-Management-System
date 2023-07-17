@@ -5,32 +5,48 @@ require("../../util/JWT");
 const ClassificationController = {
   getList: async (req, res) => {
     let classificationData;
+    let arr;
     await ClassificationService.getDFLList().then(async (res) => {
       classificationData = JSON.parse(JSON.stringify(res));
       for (let key in classificationData) {
         await ClassificationService.getZFLList(
-          classificationData[key]["dflID"]
+          classificationData[key]["ID"]
         ).then(async (res) => {
-          classificationData[key]["children"] = JSON.stringify(res);
-
-          for (let i in JSON.parse(classificationData[key]["children"])) {
+          arr = JSON.parse(JSON.stringify(res));
+          classificationData[key]["children"] = [];
+          for (let i in arr) {
+            classificationData[key]["children"].push(arr[i]);
+          }
+          for (let i in classificationData[key]["children"]) {
             await ClassificationService.getXFLList(
-              JSON.parse(classificationData[key]["children"])[i]["zflID"]
+              classificationData[key]["children"][i]["ID"]
             ).then((res) => {
-              JSON.parse(classificationData[key]["children"])[i]["children"] = {
-                xx: 1,
-              };
-              console.log(
-                "看看：",
-                JSON.parse(classificationData[key]["children"])[i]["children"]
-              );
+              arr = JSON.parse(JSON.stringify(res));
+              classificationData[key]["children"][i]["children"] = [];
+              for (let j in arr) {
+                classificationData[key]["children"][i]["children"].push(arr[j]);
+              }
             });
           }
         });
       }
-      // console.log("~~~:", classificationData);
     });
-    // console.log("数据：", classificationData);
+    res.send({
+      code: 200,
+      msg: "成功！",
+      data: classificationData,
+    });
+  },
+  addClass: async (req, res) => {
+    console.log("值为：", req.body);
+    await ClassificationService.addClass(req.body).then((resp) => {
+      console.log("res:", resp);
+      res.send({
+        code: 200,
+        msg: "添加成功",
+        data: resp,
+      });
+    });
   },
 };
 

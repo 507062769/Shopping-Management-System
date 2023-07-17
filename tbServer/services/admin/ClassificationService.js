@@ -16,6 +16,28 @@ const ClassificationService = {
       where: { zflID: id },
     });
   },
+
+  addClass: async ({ Name, level, parentID }) => {
+    console.log(Name, level, parentID);
+    switch (level) {
+      case 0:
+        return DFL.create({
+          Name,
+        });
+      case 1:
+        return ZFL.create({
+          Name,
+          dflID: parentID,
+        });
+      case 2:
+        return XFL.create({
+          Name,
+          zflID: parentID,
+        });
+      default:
+        return "错误";
+    }
+  },
 };
 
 module.exports = ClassificationService;
