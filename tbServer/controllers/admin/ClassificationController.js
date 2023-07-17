@@ -56,12 +56,61 @@ const ClassificationController = {
     });
   },
   delClass: async (req, res) => {
-    await ClassificationService.delClass(req.params).then((resp) => {
-      res.send({
-        code: 200,
-        msg: "成功",
-      });
-    });
+    console.log("@", req.params);
+    switch (req.params.level) {
+      case "1":
+        await ClassificationService.getZFLList(req.params.ID).then(
+          async (resp) => {
+            JSON.stringify(resp) != "[]"
+              ? res.send({
+                  code: 300,
+                  msg: "存在值，不能删除",
+                })
+              : await ClassificationService.delClass(req.params).then(
+                  (resp) => {
+                    res.send({
+                      code: 200,
+                      msg: "成功",
+                    });
+                  }
+                );
+          }
+        );
+        break;
+      case "2":
+        await ClassificationService.getXFLList(req.params.ID).then(
+          async (resp) => {
+            JSON.stringify(resp) != "[]"
+              ? res.send({
+                  code: 300,
+                  msg: "存在值，不能删除",
+                })
+              : await ClassificationService.delClass(req.params).then(
+                  (resp) => {
+                    res.send({
+                      code: 200,
+                      msg: "成功",
+                    });
+                  }
+                );
+          }
+        );
+        break;
+      case "3":
+        await ClassificationService.delClass(req.params).then((resp) => {
+          res.send({
+            code: 200,
+            msg: "成功",
+          });
+        });
+        break;
+      default:
+        res.send({
+          code: 300,
+          msg: "未知错误",
+        });
+        break;
+    }
   },
 };
 
