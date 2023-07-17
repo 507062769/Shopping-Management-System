@@ -16,9 +16,7 @@ const ClassificationService = {
       where: { zflID: id },
     });
   },
-
   addClass: async ({ Name, level, parentID }) => {
-    console.log(Name, level, parentID);
     switch (level) {
       case 0:
         return DFL.create({
@@ -34,6 +32,31 @@ const ClassificationService = {
           Name,
           zflID: parentID,
         });
+      default:
+        return "错误";
+    }
+  },
+  editClass: async ({ ID, Name, level }) => {
+    switch (level) {
+      case 1:
+        return DFL.update({ Name }, { where: { ID } });
+      case 2:
+        return ZFL.update({ Name }, { where: { ID } });
+      case 3:
+        return XFL.update({ Name }, { where: { ID } });
+      default:
+        break;
+    }
+  },
+  delClass: async ({ ID, level }) => {
+    console.log("ID,level:", ID, typeof level);
+    switch (level) {
+      case "1":
+        return DFL.destroy({ where: { ID } });
+      case "2":
+        return ZFL.destroy({ where: { ID } });
+      case "3":
+        return XFL.destroy({ where: { ID } });
       default:
         return "错误";
     }

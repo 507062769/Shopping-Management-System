@@ -38,13 +38,28 @@ const ClassificationController = {
     });
   },
   addClass: async (req, res) => {
-    console.log("值为：", req.body);
     await ClassificationService.addClass(req.body).then((resp) => {
       console.log("res:", resp);
       res.send({
         code: 200,
         msg: "添加成功",
         data: resp,
+      });
+    });
+  },
+  editClass: async (req, res) => {
+    await ClassificationService.editClass(req.body).then((resp) => {
+      res.send({
+        code: 200,
+        msg: "成功",
+      });
+    });
+  },
+  delClass: async (req, res) => {
+    await ClassificationService.delClass(req.params).then((resp) => {
+      res.send({
+        code: 200,
+        msg: "成功",
       });
     });
   },

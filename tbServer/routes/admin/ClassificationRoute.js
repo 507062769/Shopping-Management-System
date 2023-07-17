@@ -12,4 +12,13 @@ ClassificationRoute.post(
   ClassificationController.addClass
 );
 
+ClassificationRoute.post(
+  "/classification/editClass",
+  ClassificationController.editClass
+);
+ClassificationRoute.delete(
+  "/classification/delClass/:level/:ID",
+  ClassificationController.delClass
+);
+
 module.exports = ClassificationRoute;
