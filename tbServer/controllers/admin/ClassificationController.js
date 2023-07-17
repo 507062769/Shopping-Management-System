@@ -1,5 +1,4 @@
 const ClassificationService = require("../../services/admin/ClassificationService");
-const JWT = require("../../util/JWT");
 require("../../util/JWT");
 
 const ClassificationController = {
@@ -56,7 +55,6 @@ const ClassificationController = {
     });
   },
   delClass: async (req, res) => {
-    console.log("@", req.params);
     switch (req.params.level) {
       case "1":
         await ClassificationService.getZFLList(req.params.ID).then(

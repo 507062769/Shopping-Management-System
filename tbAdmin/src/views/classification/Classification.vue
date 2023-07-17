@@ -99,7 +99,6 @@ export default {
         },
 
         remove(node, data) {
-
             this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -153,20 +152,11 @@ export default {
 
         addClassification() {
             this.dialogVisible = false
-            // if (this.form.state === 'add') {
-            console.log("当前状态：", this.form.state);
             this.$axios.post(`/adminAPI/classification/${this.form.state}Class`, this.form).then(res => {
                 console.log("修改成功");
                 this.form = {}
                 this.getClassification()
             })
-            // } else if (this.form.state === 'edit') {
-            //     this.$axios.put('/adminAPI/classification/editClass', this.form).then(res => {
-            //         this.form = {}
-
-            //     })
-            // }
-
         },
 
         filterNode(value, data) {

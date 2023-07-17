@@ -41,6 +41,23 @@ const routes = [
     path: "/classification",
     component: () => import("../views/classification/Classification.vue"),
   },
+
+  {
+    name: "AttrGroup",
+    path: "/attrGroup",
+    component: () => import("../views/goods-manage/AttrGroup.vue"),
+  },
+  {
+    name: "SaleAttr",
+    path: "/saleAttr",
+    component: () => import("../views/goods-manage/SaleAttr.vue"),
+  },
+  {
+    name: "Specification",
+    path: "/specification",
+    component: () => import("../views/goods-manage/Specifications.vue"),
+  },
+
   {
     name: "NotFound",
     path: "/:pathMath(.*)*",
