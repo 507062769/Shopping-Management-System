@@ -118,6 +118,11 @@ export default {
                             message: '删除成功!'
                         });
                         this.getClassification()
+                    } else {
+                        this.$message({
+                            type: 'error',
+                            message: '分类中存在值，不能删除!'
+                        });
                     }
                 })
             }).catch(() => {
