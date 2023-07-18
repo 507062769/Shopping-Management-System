@@ -19,4 +19,8 @@ GoodsRoute.put("/Goods/attr_group/putGroup", GoodsController.putGroup);
 
 GoodsRoute.delete("/Goods/attr_group/delGroup", GoodsController.delGroup);
 
+GoodsRoute.get("/Goods/attr/getAttrList", GoodsController.getAttrList);
+
+GoodsRoute.post("/Goods/attr/addAttr", GoodsController.addAttr);
+
 module.exports = GoodsRoute;

@@ -69,6 +69,24 @@ const GoodsController = {
       msg: "成功",
     });
   },
+
+  getAttrList: async (req, res) => {
+    await GoodsService.getAttrList().then((resp) => {
+      res.send({
+        code: 200,
+        msg: "成功",
+        data: resp,
+      });
+    });
+  },
+  addAttr: async (req, res) => {
+    await GoodsService.addAttr(req.body).then((resp) => {
+      res.send({
+        code: 200,
+        msg: "成功",
+      });
+    });
+  },
 };
 
 module.exports = GoodsController;

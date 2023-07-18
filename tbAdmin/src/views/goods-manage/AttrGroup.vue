@@ -53,7 +53,8 @@
                         <template slot-scope="{ node, data }">
                             <span>{{ data.Name }}</span>
                             <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
-                        </template></el-cascader>
+                        </template>
+                    </el-cascader>
                 </el-form-item>
             </el-form>
             <div slot="footer" class="dialog-footer">

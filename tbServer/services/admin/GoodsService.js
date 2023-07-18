@@ -1,4 +1,6 @@
 const { attrGroup } = require("../../models/admin/attr_Group");
+const { attr } = require("../../models/admin/attr");
+
 const seq = require("sequelize");
 const Op = seq.Op;
 
@@ -53,6 +55,30 @@ const GoodsService = {
   },
   delGroup: (attr_Group_ID) => {
     return attrGroup.destroy({ where: { attr_Group_ID } });
+  },
+  getAttrList: async () => {
+    return attr.findAll();
+  },
+  addAttr: async ({
+    attr_Name,
+    attr_Type,
+    enable,
+    value_Select,
+    value_Type,
+    xflID,
+  }) => {
+    let value = "";
+    for (let i = 0; i < value_Select.length; i++) {
+      value += value_Select[i] + ";";
+    }
+    return attr.create({
+      attr_Name,
+      attr_Type,
+      enable,
+      value_Select: value,
+      value_Type,
+      xflID: xflID[2],
+    });
   },
 };
 
