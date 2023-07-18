@@ -30,7 +30,6 @@ export default {
             })
         },
         handleClick(data, node, component) {
-            console.log("树组件被点击:", data, node, component);
             this.$emit("treeClick", data, node, component)
         },
 

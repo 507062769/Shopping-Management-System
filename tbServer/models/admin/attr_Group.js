@@ -12,6 +12,14 @@ const attrGroup = sequelize.define(
       type: Sequelize.STRING, // 字段类型
       allowNull: false, //是否允许为空，默认true
     },
+    dflID: {
+      type: Sequelize.INTEGER.UNSIGNED, // 字段类型
+      allowNull: false,
+    },
+    zflID: {
+      type: Sequelize.INTEGER.UNSIGNED, // 字段类型
+      allowNull: false,
+    },
     xflID: {
       type: Sequelize.INTEGER.UNSIGNED, // 字段类型
       allowNull: false,
