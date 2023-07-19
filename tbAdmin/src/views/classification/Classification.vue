@@ -71,6 +71,7 @@ export default {
         getClassification() {
             this.$axios.get('/adminAPI/classification/list').then(res => {
                 this.data = res.data.data
+                localStorage.setItem('classificationList', JSON.stringify(this.data))
             })
         },
 
@@ -146,14 +147,13 @@ export default {
         },
 
         addDFL() {
-            this.dialogVisible = true,
-                this.form.state = 'add'
+            this.dialogVisible = true;
+            this.form.state = 'add'
         },
 
         addClassification() {
             this.dialogVisible = false
             this.$axios.post(`/adminAPI/classification/${this.form.state}Class`, this.form).then(res => {
-                console.log("修改成功");
                 this.form = {}
                 this.getClassification()
             })

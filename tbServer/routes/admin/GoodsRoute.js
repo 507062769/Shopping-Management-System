@@ -23,4 +23,14 @@ GoodsRoute.get("/Goods/attr/getAttrList", GoodsController.getAttrList);
 
 GoodsRoute.post("/Goods/attr/addAttr", GoodsController.addAttr);
 
+GoodsRoute.post(
+  "/Goods/attr_group_relation/addRelation",
+  GoodsController.addRelation
+);
+
+GoodsRoute.get(
+  "/Goods/attr_group_relation/getList",
+  GoodsController.getRelationList
+);
+
 module.exports = GoodsRoute;

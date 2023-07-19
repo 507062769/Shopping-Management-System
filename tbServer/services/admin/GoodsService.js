@@ -1,5 +1,6 @@
 const { attrGroup } = require("../../models/admin/attr_Group");
 const { attr } = require("../../models/admin/attr");
+const { attrGroupRelation } = require("../../models/admin/attr_group_relation");
 
 const seq = require("sequelize");
 const Op = seq.Op;
@@ -69,7 +70,7 @@ const GoodsService = {
   }) => {
     let value = "";
     for (let i = 0; i < value_Select.length; i++) {
-      value += value_Select[i] + ";";
+      value += value_Select[i] + "，";
     }
     return attr.create({
       attr_Name,
@@ -79,6 +80,15 @@ const GoodsService = {
       value_Type,
       xflID: xflID[2],
     });
+  },
+  addRelation: async ({ attr_ID, attr_Group_ID }) => {
+    return attrGroupRelation.create({
+      attr_ID,
+      attr_Group_ID,
+    });
+  },
+  getRelationList: async () => {
+    return attrGroupRelation.findAll();
   },
 };
 

@@ -84,6 +84,25 @@ const GoodsController = {
       res.send({
         code: 200,
         msg: "成功",
+        data: resp,
+      });
+    });
+  },
+  addRelation: async (req, res) => {
+    await GoodsService.addRelation(req.body).then((resp) => {
+      res.send({
+        code: 200,
+        msg: "成功",
+      });
+    });
+  },
+  getRelationList: async (req, res) => {
+    await GoodsService.getRelationList().then((resp) => {
+      console.log("关系resp：", resp);
+      res.send({
+        code: 200,
+        msg: "成功",
+        data: resp,
       });
     });
   },

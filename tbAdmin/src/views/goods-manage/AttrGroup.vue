@@ -111,6 +111,7 @@ export default {
         getGroupList() {
             this.$axios.get("/adminAPI/Goods/attr_group/getGroupList").then(res => {
                 this.attrGroupData = res.data.data
+                localStorage.setItem("attr_group_list", JSON.stringify(this.attrGroupData))
             })
         },
         handleDelete(index, row) {

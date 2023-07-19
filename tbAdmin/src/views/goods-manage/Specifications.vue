@@ -13,26 +13,40 @@
                 </div>
                 <div class="attrList">
                     <el-table border ref="multipleTable" :data="attrData" tooltip-effect="dark" style="width: 100%"
-                        @selection-change="handleSelectionChange">
-                        <el-table-column type="selection" width="50" align="center">
+                        max-height="500" @selection-change="handleSelectionChange">
+                        <el-table-column type="selection" width="50" align="center" fixed>
                         </el-table-column>
-                        <el-table-column prop="attr_ID" label="属性ID" width="70" align="center">
+                        <el-table-column prop="attr_ID" label="属性ID" width="70" align="center" fixed>
                         </el-table-column>
-                        <el-table-column prop="attr_Name" label="属性名" width="120" align="center">
+                        <el-table-column prop="attr_Name" label="属性名" width="120" align="center" fixed>
                         </el-table-column>
-                        <el-table-column prop="attr_Type" label="属性类型" width="80" align="center">
+                        <el-table-column prop="attr_Type" label="属性类型" width="100" align="center">
+                            <template slot-scope="scope">
+                                <el-tag size="medium" v-show="scope.row.attr_Type === '0'">销售属性</el-tag>
+                                <el-tag size="medium" v-show="scope.row.attr_Type === '1'">规格参数</el-tag>
+                            </template>
                         </el-table-column>
-                        <el-table-column prop="value_Type" label="值类型" width="65" align="center">
+                        <el-table-column prop="value_Type" label="值类型" width="80" align="center">
+                            <template slot-scope="scope">
+                                <el-tag size="medium" v-show="scope.row.value_Type === '0'">多值</el-tag>
+                                <el-tag size="medium" v-show="scope.row.value_Type === '1'">单值</el-tag>
+                            </template>
                         </el-table-column>
-                        <el-table-column prop="value_Select" label="可选值" width="190" align="center">
+                        <el-table-column prop="value_Select" label="可选值" width="180" align="center">
+                            <template slot-scope="scope">
+                                <el-popover trigger="hover" placement="top">
+                                    <p>{{ scope.row.value_Select }}</p>
+                                    <el-tag slot="reference" size="medium">{{ scope.row.value_Select }}</el-tag>
+                                </el-popover>
+                            </template>
                         </el-table-column>
-                        <el-table-column prop="xflID" label="所属类别" width="80" align="center">
+                        <el-table-column prop="xflName" label="所属类别" width="80" align="center">
                         </el-table-column>
                         <el-table-column prop="groupName" label="所属分组" width="80" align="center">
                         </el-table-column>
                         <el-table-column prop="enable" label="是否可见" width="80" align="center">
                         </el-table-column>
-                        <el-table-column label="操作" width="190" align="center">
+                        <el-table-column label="操作" width="190" align="center" fixed="right">
                             <template slot-scope="scope">
                                 <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
                                 <el-button size="mini" type="danger"
@@ -74,13 +88,13 @@
                                 </el-cascader>
                             </el-form-item>
                             <el-form-item label="所属分组" label-width="100px">
-                                <el-select v-model="attrForm.groupName" filterable placeholder="请选择">
+                                <el-select v-model="attr_group_ID" filterable placeholder="请选择">
                                     <el-option v-for="item in attrGroup" :key="item.attr_Group_ID"
-                                        :label="item.attr_Group_Name" :value="item.attr_Group_Name">
+                                        :label="item.attr_Group_Name" :value="item.attr_Group_ID">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label=" 是否可见" label-width="100px">
+                            <el-form-item label=" 是否启用" label-width="100px">
                                 <el-switch v-model="attrForm.enable" active-color="#13ce66" active-value="1"
                                     inactive-color="#ff4949" inactive-value="0">
                                 </el-switch>
@@ -110,70 +124,130 @@ export default {
     components: { tree },
     data() {
         return {
+            // 搜索框的值
             attrName: "",
+            // table展示的内容来源
             attrData: [],
+            // 添加/编辑时数据存放地
             attrForm: {},
+            attr_group_ID: null,
+            // 添加/编辑的 dialog 是否显示
             dialogFormVisible: false,
+            // 三级分类集合
             classificationList: [],
+            // 自定义树展示方式
             zdyOption: {
                 value: 'ID',
                 label: 'Name',
                 children: 'children'
             },
-            attrGroup: []
+            // 属性组的内容
+            attrGroup: [],
+            // 属性与组的关系字段
+            attr_group_relation: [],
         }
     },
     create() { },
     mounted() {
+        this.getAttrGroupRelation()
+
         this.getAttrList()
         this.getClassificationList()
     },
     watch: {},
     computed: {},
     methods: {
+        // 获取三级分类列表
         getClassificationList() {
             this.$axios.get('/adminAPI/classification/list').then(res => {
                 this.classificationList = res.data.data
             })
         },
+        // 获取属性列表
         getAttrList() {
             this.$axios.get("/adminAPI/Goods/attr/getAttrList").then(res => {
                 this.attrData = res.data.data
+                const xflName = JSON.parse(localStorage.getItem("classificationList"))
+                const attrGroupList = JSON.parse(localStorage.getItem("attr_group_list"))
+                this.attrData.forEach(data => {
+                    xflName.forEach(Dfl => {
+                        Dfl["children"].forEach(Zfl => {
+                            Zfl["children"].forEach(xfl => {
+                                if (data.xflID === xfl.ID) data['xflName'] = xfl.Name
+                            })
+                        })
+                    });
+                    this.attr_group_relation.forEach(rela => {
+                        if (data.attr_ID === rela.attr_ID) {
+                            attrGroupList.forEach(group => {
+                                if (group.attr_Group_ID === rela.attr_Group_ID) data['groupName'] = group.attr_Group_Name
+                            })
+
+                        }
+                    })
+                })
             })
         },
+        getAttrGroupRelation() {
+            this.$axios.get("/adminAPI/Goods/attr_group_relation/getList").then(res => {
+                this.attr_group_relation = res.data.data
+            })
+        },
+        // 处理点击分类后的逻辑
         handleClickTree(data, node, component) {
 
         },
+        // 处理点搜索按钮后逻辑
         attrNameSearch() {
 
         },
+        // 处理点击添加的逻辑
         handleAddAttr() {
             this.dialogFormVisible = true
         },
+        // 处理批量删除
         handleBatchDelData() {
 
         },
+        //  处理 选中分类后的逻辑
         handleSelectionChange() {
 
         },
+        // 处理编辑
         handleEdit() {
 
         },
+        // 处理删除
         handleDelete() {
 
         },
+        // 处理提交表单
         submitAttrForm() {
-            console.log("我要提交的内容：", this.attrForm);
             this.$axios.post("/adminAPI/Goods/attr/addAttr", this.attrForm).then(res => {
+                if (res.data.data.attr_ID) {
+                    this.$axios.post("/adminAPI/Goods/attr_group_relation/addRelation",
+                        {
+                            attr_ID: res.data.data.attr_ID,
+                            attr_Group_ID: this.attr_group_ID
+                        })
+                        .then(resp => {
+                            console.log("关系请求成：", resp);
+                            this.getAttrList()
+                        })
+                }
                 this.dialogFormVisible = false;
                 this.attrForm = {}
                 this.getAttrList()
             })
         },
+        // 处理分类被选中后逻辑
         handleClassificationChange(val) {
-            this.$axios.post(`/adminAPI/Goods/attr_group/getGroup/${val.length}/${val[2]}`).then(res => {
-                this.attrGroup = res.data.data
-            })
+            if (val) {
+                this.$axios.post(`/adminAPI/Goods/attr_group/getGroup/${val.length}/${val[2]}`).then(res => {
+                    this.attrGroup = res.data.data
+                })
+            }
+
         },
     },
 }
