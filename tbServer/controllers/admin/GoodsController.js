@@ -93,12 +93,12 @@ const GoodsController = {
       res.send({
         code: 200,
         msg: "成功",
+        data: resp,
       });
     });
   },
   getRelationList: async (req, res) => {
     await GoodsService.getRelationList().then((resp) => {
-      console.log("关系resp：", resp);
       res.send({
         code: 200,
         msg: "成功",

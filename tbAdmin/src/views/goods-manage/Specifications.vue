@@ -6,7 +6,7 @@
             </el-col>
             <el-col :span="18">
                 <div class="attrBtn">
-                    <el-input v-model="attrName" placeholder="参数名"></el-input>
+                    <el-input v-model="searchAttrName" placeholder="参数名"></el-input>
                     <el-button type="success" round @click="attrNameSearch">查询</el-button>
                     <el-button type="primary" round @click="handleAddAttr">新增</el-button>
                     <el-button type="danger" round @click="handleBatchDelData">批量删除</el-button>
@@ -51,7 +51,6 @@
                                 <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
                                 <el-button size="mini" type="danger"
                                     @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-
                             </template>
                         </el-table-column>
                     </el-table>
@@ -88,7 +87,7 @@
                                 </el-cascader>
                             </el-form-item>
                             <el-form-item label="所属分组" label-width="100px">
-                                <el-select v-model="attr_group_ID" filterable placeholder="请选择">
+                                <el-select v-model="attrForm.attr_group_ID" filterable placeholder="请选择">
                                     <el-option v-for="item in attrGroup" :key="item.attr_Group_ID"
                                         :label="item.attr_Group_Name" :value="item.attr_Group_ID">
                                     </el-option>
@@ -125,12 +124,11 @@ export default {
     data() {
         return {
             // 搜索框的值
-            attrName: "",
+            searchAttrName: "",
             // table展示的内容来源
             attrData: [],
             // 添加/编辑时数据存放地
             attrForm: {},
-            attr_group_ID: null,
             // 添加/编辑的 dialog 是否显示
             dialogFormVisible: false,
             // 三级分类集合
@@ -145,6 +143,7 @@ export default {
             attrGroup: [],
             // 属性与组的关系字段
             attr_group_relation: [],
+            value: [],
         }
     },
     create() { },
@@ -159,18 +158,15 @@ export default {
     methods: {
         // 获取三级分类列表
         getClassificationList() {
-            this.$axios.get('/adminAPI/classification/list').then(res => {
-                this.classificationList = res.data.data
-            })
+            this.classificationList = JSON.parse(localStorage.getItem("classificationList"))
         },
-        // 获取属性列表
+        // 获取属性列表并显示对应的名称
         getAttrList() {
             this.$axios.get("/adminAPI/Goods/attr/getAttrList").then(res => {
                 this.attrData = res.data.data
-                const xflName = JSON.parse(localStorage.getItem("classificationList"))
                 const attrGroupList = JSON.parse(localStorage.getItem("attr_group_list"))
                 this.attrData.forEach(data => {
-                    xflName.forEach(Dfl => {
+                    this.classificationList.forEach(Dfl => {
                         Dfl["children"].forEach(Zfl => {
                             Zfl["children"].forEach(xfl => {
                                 if (data.xflID === xfl.ID) data['xflName'] = xfl.Name
@@ -180,9 +176,11 @@ export default {
                     this.attr_group_relation.forEach(rela => {
                         if (data.attr_ID === rela.attr_ID) {
                             attrGroupList.forEach(group => {
-                                if (group.attr_Group_ID === rela.attr_Group_ID) data['groupName'] = group.attr_Group_Name
+                                if (group.attr_Group_ID === rela.attr_Group_ID) {
+                                    data['groupName'] = group.attr_Group_Name;
+                                    data['attr_group_ID'] = group.attr_Group_ID
+                                }
                             })
-
                         }
                     })
                 })
@@ -214,8 +212,15 @@ export default {
 
         },
         // 处理编辑
-        handleEdit() {
-
+        handleEdit(row) {
+            console.log("我在编辑：", row);
+            this.attrForm = row
+            // this.attrForm.value_Select.push('aa')
+            console.log("我在看attrForm：", this.attrForm);
+            // // console.log("值选择：", );
+            // this.value = row.value_Select.split('，')
+            // console.log(this.value);
+            this.dialogFormVisible = true
         },
         // 处理删除
         handleDelete() {
@@ -228,11 +233,10 @@ export default {
                     this.$axios.post("/adminAPI/Goods/attr_group_relation/addRelation",
                         {
                             attr_ID: res.data.data.attr_ID,
-                            attr_Group_ID: this.attr_group_ID
+                            attr_Group_ID: this.attrForm.attr_group_ID
                         })
                         .then(resp => {
-                            console.log("关系请求成：", resp);
-                            this.getAttrList()
+                            this.attr_group_relation.push(resp.data.data)
                         })
                 }
                 this.dialogFormVisible = false;
