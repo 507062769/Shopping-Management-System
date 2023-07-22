@@ -60,7 +60,6 @@ const GoodsController = {
     });
   },
   delGroup: async (req, res) => {
-    console.log("接受到了数据：", req.body);
     for (let i = 0; i < req.body.length; i++) {
       await GoodsService.delGroup(req.body[i]);
     }
@@ -71,7 +70,7 @@ const GoodsController = {
   },
 
   getAttrList: async (req, res) => {
-    await GoodsService.getAttrList().then((resp) => {
+    await GoodsService.getAttrList(req.query.attr_Type).then((resp) => {
       res.send({
         code: 200,
         msg: "成功",
@@ -88,6 +87,29 @@ const GoodsController = {
       });
     });
   },
+  searchAttrName: async (req, res) => {
+    await GoodsService.searchAttrName(
+      req.body.searchName,
+      req.body.attr_Type
+    ).then((resp) => {
+      res.send({
+        code: 200,
+        msg: "搜索成功",
+        data: resp,
+      });
+    });
+  },
+  delAttr: async (req, res) => {
+    console.log("接受到了数据：", req.body);
+    for (let i = 0; i < req.body.length; i++) {
+      await GoodsService.delAttr(req.body[i]);
+    }
+    res.send({
+      code: 200,
+      msg: "成功",
+    });
+  },
+
   addRelation: async (req, res) => {
     await GoodsService.addRelation(req.body).then((resp) => {
       res.send({

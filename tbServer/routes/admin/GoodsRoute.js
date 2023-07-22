@@ -23,6 +23,10 @@ GoodsRoute.get("/Goods/attr/getAttrList", GoodsController.getAttrList);
 
 GoodsRoute.post("/Goods/attr/addAttr", GoodsController.addAttr);
 
+GoodsRoute.post("/Goods/attr/searchName", GoodsController.searchAttrName);
+
+GoodsRoute.delete("/Goods/attr/delAttr", GoodsController.delAttr);
+
 GoodsRoute.post(
   "/Goods/attr_group_relation/addRelation",
   GoodsController.addRelation

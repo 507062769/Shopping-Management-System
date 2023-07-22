@@ -35,11 +35,14 @@ const GoodsService = {
       xflID: classificationID[2],
     });
   },
-  searchName: async (Name) => {
+  searchName: async (name, type) => {
     return attrGroup.findAll({
       where: {
         attr_Group_Name: {
-          [Op.like]: `%${Name}%`,
+          [Op.like]: `%${name}%`,
+        },
+        attr_Type: {
+          [Op.like]: `%${type}%`,
         },
       },
     });
@@ -57,8 +60,8 @@ const GoodsService = {
   delGroup: (attr_Group_ID) => {
     return attrGroup.destroy({ where: { attr_Group_ID } });
   },
-  getAttrList: async () => {
-    return attr.findAll();
+  getAttrList: async (attr_Type) => {
+    return attr.findAll({ where: { attr_Type } });
   },
   addAttr: async ({
     attr_Name,
@@ -81,6 +84,22 @@ const GoodsService = {
       xflID: xflID[2],
     });
   },
+  delAttr: async (attr_ID) => {
+    return attr.destroy({ where: { attr_ID } });
+  },
+  searchAttrName: async (Name) => {
+    return attr.findAll({
+      where: {
+        attr_Name: {
+          [Op.like]: `%${Name}%`,
+        },
+      },
+    });
+  },
+  delAttr: (attr_ID) => {
+    return attr.destroy({ where: { attr_ID } });
+  },
+
   addRelation: async ({ attr_ID, attr_Group_ID }) => {
     return attrGroupRelation.create({
       attr_ID,
@@ -89,6 +108,9 @@ const GoodsService = {
   },
   getRelationList: async () => {
     return attrGroupRelation.findAll();
+  },
+  delAttrGroupRelation: async (attr_ID) => {
+    return attrGroupRelation.destroy({ where: { attr_ID } });
   },
 };
 

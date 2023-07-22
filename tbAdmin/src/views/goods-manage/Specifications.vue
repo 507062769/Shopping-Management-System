@@ -6,7 +6,7 @@
             </el-col>
             <el-col :span="18">
                 <div class="attrBtn">
-                    <el-input v-model="searchAttrName" placeholder="参数名"></el-input>
+                    <el-input v-model="searchAttrName" placeholder="请输入要搜索的属性名" clearable></el-input>
                     <el-button type="success" round @click="attrNameSearch">查询</el-button>
                     <el-button type="primary" round @click="handleAddAttr">新增</el-button>
                     <el-button type="danger" round @click="handleBatchDelData">批量删除</el-button>
@@ -128,7 +128,17 @@ export default {
             // table展示的内容来源
             attrData: [],
             // 添加/编辑时数据存放地
-            attrForm: {},
+            attrForm: {
+                attr_ID: '',
+                attr_Name: '',
+                attr_Type: '',
+                value_Type: '',
+                value_Select: '',
+                xflName: '',
+                groupName: '',
+                enable: '1',
+
+            },
             // 添加/编辑的 dialog 是否显示
             dialogFormVisible: false,
             // 三级分类集合
@@ -143,7 +153,7 @@ export default {
             attrGroup: [],
             // 属性与组的关系字段
             attr_group_relation: [],
-            value: [],
+            batchDelData: [],
         }
     },
     create() { },
@@ -162,7 +172,7 @@ export default {
         },
         // 获取属性列表并显示对应的名称
         getAttrList() {
-            this.$axios.get("/adminAPI/Goods/attr/getAttrList").then(res => {
+            this.$axios.get(`/adminAPI/Goods/attr/getAttrList`, { params: { 'attr_Type': '1' } }).then(res => {
                 this.attrData = res.data.data
                 const attrGroupList = JSON.parse(localStorage.getItem("attr_group_list"))
                 this.attrData.forEach(data => {
@@ -197,7 +207,10 @@ export default {
         },
         // 处理点搜索按钮后逻辑
         attrNameSearch() {
-
+            this.searchAttrName !== '' ? this.$axios.post(`/adminAPI/Goods/attr/searchName`, { searchName: this.searchAttrName, attr_Type: '1' }).then(res => {
+                console.log(res);
+                this.attrData = res.data.data
+            }) : this.getAttrList()
         },
         // 处理点击添加的逻辑
         handleAddAttr() {
@@ -205,26 +218,65 @@ export default {
         },
         // 处理批量删除
         handleBatchDelData() {
-
+            this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                this.$axios.delete(`/adminAPI/Goods/attr/delAttr`, { data: this.batchDelData }).then(res => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功！'
+                    })
+                    this.getAttrList()
+                })
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });
+            });
         },
         //  处理 选中分类后的逻辑
-        handleSelectionChange() {
-
+        handleSelectionChange(val) {
+            this.batchDelData = []
+            val.forEach(item => {
+                this.batchDelData.push(item.attr_ID)
+            });
         },
         // 处理编辑
         handleEdit(row) {
-            console.log("我在编辑：", row);
-            this.attrForm = row
-            // this.attrForm.value_Select.push('aa')
-            console.log("我在看attrForm：", this.attrForm);
+            console.log("我点了编辑：", row);
+            // this.attrForm = row
+            // // this.attrForm.value_Select.push('aa')
+            // console.log("我在看attrForm：", this.attrForm);
             // // console.log("值选择：", );
             // this.value = row.value_Select.split('，')
             // console.log(this.value);
-            this.dialogFormVisible = true
+            // this.dialogFormVisible = true
         },
-        // 处理删除
-        handleDelete() {
-
+        // 处理删除 
+        handleDelete(index, row) {
+            this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                const arr = []
+                arr.push(row.attr_ID)
+                this.$axios.delete(`/adminAPI/Goods/attr/delAttr`, { data: arr }).then(res => {
+                    this.$message({
+                        type: 'success',
+                        message: '删除成功'
+                    });
+                    this.attrData.pop(index)
+                })
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });
+            });
         },
         // 处理提交表单
         submitAttrForm() {
