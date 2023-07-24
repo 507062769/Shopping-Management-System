@@ -68,9 +68,39 @@ const GoodsController = {
       msg: "成功",
     });
   },
+  getRelevance: async (req, res) => {
+    const attrData = [];
+    await GoodsService.getRelevance(req.params.groupID).then(async (resp) => {
+      for (let i = 0; i < resp.length; i++) {
+        await GoodsService.getAttrByID(resp[i].dataValues.attr_ID).then(
+          (respo) => {
+            attrData.push(respo[0]);
+          }
+        );
+      }
+      res.send({
+        code: 200,
+        msg: "成功",
+        data: attrData,
+      });
+    });
+  },
 
   getAttrList: async (req, res) => {
     await GoodsService.getAttrList(req.query.attr_Type).then((resp) => {
+      res.send({
+        code: 200,
+        msg: "成功",
+        data: resp,
+      });
+    });
+  },
+  getAttr: async (req, res) => {
+    await GoodsService.getAttr(
+      req.params.level,
+      req.params.id,
+      req.body.attr_Type
+    ).then((resp) => {
       res.send({
         code: 200,
         msg: "成功",
@@ -100,7 +130,6 @@ const GoodsController = {
     });
   },
   delAttr: async (req, res) => {
-    console.log("接受到了数据：", req.body);
     for (let i = 0; i < req.body.length; i++) {
       await GoodsService.delAttr(req.body[i]);
     }

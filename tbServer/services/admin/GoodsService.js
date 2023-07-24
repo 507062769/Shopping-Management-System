@@ -60,6 +60,12 @@ const GoodsService = {
   delGroup: (attr_Group_ID) => {
     return attrGroup.destroy({ where: { attr_Group_ID } });
   },
+  getRelevance: async (attr_Group_ID) => {
+    return attrGroupRelation.findAll({
+      where: { attr_Group_ID },
+    });
+  },
+
   getAttrList: async (attr_Type) => {
     return attr.findAll({ where: { attr_Type } });
   },
@@ -82,6 +88,29 @@ const GoodsService = {
       value_Select: value,
       value_Type,
       xflID: xflID[2],
+    });
+  },
+  getAttr: async (level, ID, attr_Type) => {
+    switch (level) {
+      case "1":
+        return attr.findAll({
+          where: { dflID: ID, attr_Type },
+        });
+      case "2":
+        return attr.findAll({
+          where: { zflID: ID, attr_Type },
+        });
+      case "3":
+        return attr.findAll({
+          where: { xflID: ID, attr_Type },
+        });
+      default:
+        return "错误";
+    }
+  },
+  getAttrByID: async (attr_ID) => {
+    return attr.findAll({
+      where: { attr_ID },
     });
   },
   delAttr: async (attr_ID) => {

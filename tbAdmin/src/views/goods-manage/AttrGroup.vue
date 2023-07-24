@@ -25,6 +25,7 @@
                         </el-table-column>
                         <el-table-column label="操作" width="263" align="center">
                             <template slot-scope="scope">
+                                <el-button size="mini" @click="handleRelevance(scope.row)">关联</el-button>
                                 <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
                                 <el-button size="mini" type="danger"
                                     @click="handleDelete(scope.$index, scope.row)">删除</el-button>
@@ -62,6 +63,32 @@
                 <el-button type="primary" @click="addGroup">确 定</el-button>
             </div>
         </el-dialog>
+
+        <el-dialog title="关联属性" :visible.sync="relevanceVisible" :before-close="closeRelevance">
+            <el-table ref="relevanceRef" :data="relevanceData" tooltip-effect="dark" style="width: 100%"
+                @selection-change="handleRelevanceSelectionChange">
+                <el-table-column type="selection" width="55" align="center">
+                </el-table-column>
+                <el-table-column prop="attr_ID" label="ID" width="120" align="center">
+                </el-table-column>
+                <el-table-column prop="attr_Name" label="属性名" width="120" align="center">
+                </el-table-column>
+                <el-table-column prop="value_Select" label="可选值" align="center">
+                    <template slot-scope="scope">
+                        <el-popover trigger="hover" placement="top">
+                            <p>{{ scope.row.value_Select }}</p>
+                            <el-tag slot="reference" size="medium">{{ scope.row.value_Select }}</el-tag>
+                        </el-popover>
+                    </template>
+                </el-table-column>
+                <el-table-column label="操作" width="190" align="center">
+                    <template slot-scope="scope">
+                        <el-button size="mini" type="danger"
+                            @click="removeRelevance(scope.$index, scope.row)">移除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+        </el-dialog>
     </div>
 </template>
 
@@ -80,10 +107,12 @@ export default {
             currentPage4: 4,
             // 添加页面是否展示
             addGroupVisible: false,
+            relevanceVisible: false,
             // 要添加的数据
             addGroupForm: {
                 state: 'add'
             },
+            relevanceForm: {},
             // 三级分类展示
             classificationList: [],
             // 自定义树组件的选项
@@ -93,6 +122,7 @@ export default {
                 children: 'children'
             },
             batchDelData: [],
+            relevanceData: [],
         }
     },
     create() { },
@@ -151,6 +181,9 @@ export default {
                 this.batchDelData.push(item.attr_Group_ID)
             });
         },
+        handleRelevanceSelectionChange(val) {
+            console.log("handleRelevanceSelectionChange:", val);
+        },
         handleSizeChange(val) {
             console.log(`每页 ${val} 条`);
         },
@@ -170,6 +203,16 @@ export default {
                 attr_Group_ID: row.attr_Group_ID,
                 state: 'edit',
             }
+        },
+        handleRelevance(row) {
+            this.relevanceVisible = true
+            this.$axios.post(`/adminAPI/Goods/attr_group/getRelevance/${row.attr_Group_ID}`).then(res => {
+                console.log("关联成功：", res);
+                this.relevanceData = res.data.data
+            })
+        },
+        removeRelevance(index, row) {
+            console.log("要移除：", index, row);
         },
         handleAddGroup() {
             this.addGroupVisible = true
@@ -199,6 +242,10 @@ export default {
         close() {
             this.addGroupVisible = false;
             this.addGroupForm = {}
+        },
+        closeRelevance() {
+            this.relevanceVisible = false;
+            this.relevanceForm = {}
         },
         groupNameSearch() {
             this.attrGroupName !== '' ?

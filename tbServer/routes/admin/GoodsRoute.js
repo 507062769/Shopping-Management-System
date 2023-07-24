@@ -19,7 +19,14 @@ GoodsRoute.put("/Goods/attr_group/putGroup", GoodsController.putGroup);
 
 GoodsRoute.delete("/Goods/attr_group/delGroup", GoodsController.delGroup);
 
+GoodsRoute.post(
+  "/Goods/attr_group/getRelevance/:groupID",
+  GoodsController.getRelevance
+);
+
 GoodsRoute.get("/Goods/attr/getAttrList", GoodsController.getAttrList);
+
+GoodsRoute.post("/Goods/attr/getAttr/:level/:id", GoodsController.getAttr);
 
 GoodsRoute.post("/Goods/attr/addAttr", GoodsController.addAttr);
 

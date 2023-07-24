@@ -203,7 +203,29 @@ export default {
         },
         // 处理点击分类后的逻辑
         handleClickTree(data, node, component) {
-
+            this.$axios.post(`/adminAPI/Goods/attr/getAttr/${node.level}/${data.ID}`, { attr_Type: '1' }).then(res => {
+                this.attrData = res.data.data
+                const attrGroupList = JSON.parse(localStorage.getItem("attr_group_list"))
+                this.attrData.forEach(data => {
+                    this.classificationList.forEach(Dfl => {
+                        Dfl["children"].forEach(Zfl => {
+                            Zfl["children"].forEach(xfl => {
+                                if (data.xflID === xfl.ID) data['xflName'] = xfl.Name
+                            })
+                        })
+                    });
+                    this.attr_group_relation.forEach(rela => {
+                        if (data.attr_ID === rela.attr_ID) {
+                            attrGroupList.forEach(group => {
+                                if (group.attr_Group_ID === rela.attr_Group_ID) {
+                                    data['groupName'] = group.attr_Group_Name;
+                                    data['attr_group_ID'] = group.attr_Group_ID
+                                }
+                            })
+                        }
+                    })
+                })
+            })
         },
         // 处理点搜索按钮后逻辑
         attrNameSearch() {
