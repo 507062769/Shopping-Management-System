@@ -32,8 +32,8 @@ const attrGroup = sequelize.define(
   }
 );
 
-attrGroup.sync().then(() => {
-  console.log("attr_Group模型同步成功");
-});
+// attrGroup.sync().then(() => {
+//   console.log("attr_Group模型同步成功");
+// });
 
 module.exports = { attrGroup };

@@ -4,10 +4,7 @@ const GoodsController = require("../../controllers/admin/GoodsController");
 
 GoodsRoute.get("/Goods/attr_group/getGroupList", GoodsController.getGroupList);
 
-GoodsRoute.post(
-  "/Goods/attr_group/getGroup/:level/:id",
-  GoodsController.getAttrGroup
-);
+GoodsRoute.post("/Goods/attr_group/getGroup/:id", GoodsController.getAttrGroup);
 GoodsRoute.post("/Goods/attr_group/addGroup", GoodsController.addGroup);
 
 GoodsRoute.post(
@@ -30,6 +27,8 @@ GoodsRoute.post("/Goods/attr/getAttr/:level/:id", GoodsController.getAttr);
 
 GoodsRoute.post("/Goods/attr/addAttr", GoodsController.addAttr);
 
+GoodsRoute.put("/Goods/attr/putAttr", GoodsController.putAttr);
+
 GoodsRoute.post("/Goods/attr/searchName", GoodsController.searchAttrName);
 
 GoodsRoute.delete("/Goods/attr/delAttr", GoodsController.delAttr);
@@ -42,6 +41,21 @@ GoodsRoute.post(
 GoodsRoute.get(
   "/Goods/attr_group_relation/getList",
   GoodsController.getRelationList
+);
+
+GoodsRoute.put(
+  "/Goods/attr_group_relation/putRelation",
+  GoodsController.putRelation
+);
+
+GoodsRoute.delete(
+  "/Goods/attr_group_relation/delRelevance",
+  GoodsController.delRelevance
+);
+
+GoodsRoute.get(
+  "/Goods/attr_group_relation/getNotGroupRelation",
+  GoodsController.getNotGroupRelation
 );
 
 module.exports = GoodsRoute;

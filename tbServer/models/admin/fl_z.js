@@ -24,8 +24,8 @@ const ZFL = sequelize.define(
   }
 );
 
-ZFL.sync().then(() => {
-  console.log("ZFL模型同步成功");
-});
+// ZFL.sync().then(() => {
+//   console.log("ZFL模型同步成功");
+// });
 
 module.exports = { ZFL };

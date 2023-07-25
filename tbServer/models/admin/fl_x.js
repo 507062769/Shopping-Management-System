@@ -24,8 +24,8 @@ const XFL = sequelize.define(
   }
 );
 
-XFL.sync().then(() => {
-  console.log("XFL模型同步成功");
-});
+// XFL.sync().then(() => {
+//   console.log("XFL模型同步成功");
+// });
 
 module.exports = { XFL };

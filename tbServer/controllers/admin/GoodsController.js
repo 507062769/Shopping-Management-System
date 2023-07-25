@@ -12,15 +12,13 @@ const GoodsController = {
     });
   },
   getAttrGroup: async (req, res) => {
-    await GoodsService.getAttrGroup(req.params.level, req.params.id).then(
-      (resp) => {
-        res.send({
-          code: 200,
-          msg: "成功",
-          data: resp,
-        });
-      }
-    );
+    await GoodsService.getAttrGroup(req.params.id).then((resp) => {
+      res.send({
+        code: 200,
+        msg: "成功",
+        data: resp,
+      });
+    });
   },
   addGroup: async (req, res) => {
     await GoodsService.addGroup(req.body).then((resp) => {
@@ -117,6 +115,16 @@ const GoodsController = {
       });
     });
   },
+  putAttr: async (req, res) => {
+    console.log("接受的值：", req.body);
+    await GoodsService.putAttr(req.body).then((resp) => {
+      console.log(resp);
+      res.send({
+        code: 200,
+        msg: "成功",
+      });
+    });
+  },
   searchAttrName: async (req, res) => {
     await GoodsService.searchAttrName(
       req.body.searchName,
@@ -132,6 +140,7 @@ const GoodsController = {
   delAttr: async (req, res) => {
     for (let i = 0; i < req.body.length; i++) {
       await GoodsService.delAttr(req.body[i]);
+      return true;
     }
     res.send({
       code: 200,
@@ -140,12 +149,13 @@ const GoodsController = {
   },
 
   addRelation: async (req, res) => {
-    await GoodsService.addRelation(req.body).then((resp) => {
-      res.send({
-        code: 200,
-        msg: "成功",
-        data: resp,
-      });
+    console.log("req.body:", req.body);
+    req.body.forEach(async (val) => {
+      await GoodsService.addRelation(val).then((resp) => {});
+    });
+    res.send({
+      code: 200,
+      msg: "成功",
     });
   },
   getRelationList: async (req, res) => {
@@ -156,6 +166,39 @@ const GoodsController = {
         data: resp,
       });
     });
+  },
+  putRelation: async (req, res) => {
+    console.log("接受的值：", req.body);
+    await GoodsService.putRelation(req.body).then((resp) => {
+      console.log(resp);
+      res.send({
+        code: 200,
+        msg: "成功",
+      });
+    });
+  },
+  delRelevance: async (req, res) => {
+    for (let i = 0; i < req.body.length; i++) {
+      await GoodsService.delRelevance(req.body[i]);
+    }
+    res.send({
+      code: 200,
+      msg: "成功",
+    });
+  },
+  getNotGroupRelation: async (req, res) => {
+    const data = [];
+    await GoodsService.getRelationIDByID().then((resp) => {
+      resp.forEach((val) => data.push(val.dataValues.attr_ID));
+    });
+    await GoodsService.getAttrByXflID(req.query.currentGroup.xflID, data).then(
+      (resp) =>
+        res.send({
+          code: 200,
+          msg: "成功",
+          data: resp,
+        })
+    );
   },
 };
 

@@ -40,8 +40,8 @@ const attr = sequelize.define(
   }
 );
 
-attr.sync().then(() => {
-  console.log("attr模型同步成功");
-});
+// attr.sync().then(() => {
+//   console.log("attr模型同步成功");
+// });
 
 module.exports = { attr };

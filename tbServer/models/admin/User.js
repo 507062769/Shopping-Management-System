@@ -37,8 +37,8 @@ const User = sequelize.define(
   }
 );
 
-User.sync().then(() => {
-  console.log("User模型同步成功");
-});
+// User.sync().then(() => {
+//   console.log("User模型同步成功");
+// });
 
 module.exports = { User };

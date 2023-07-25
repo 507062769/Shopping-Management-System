@@ -13,7 +13,7 @@
                 </div>
                 <div class="attrList">
                     <el-table border ref="multipleTable" :data="attrData" tooltip-effect="dark" style="width: 100%"
-                        max-height="500" @selection-change="handleSelectionChange">
+                        max-height="700" @selection-change="handleSelectionChange">
                         <el-table-column type="selection" width="50" align="center" fixed>
                         </el-table-column>
                         <el-table-column prop="attr_ID" label="属性ID" width="70" align="center" fixed>
@@ -55,7 +55,7 @@
                         </el-table-column>
                     </el-table>
 
-                    <el-dialog title="添加属性" :visible.sync="dialogFormVisible">
+                    <el-dialog title="添加属性" :visible.sync="dialogFormVisible" :before-close="closeDialog">
                         <el-form :model="attrForm">
                             <el-form-item label="属性名称" label-width="100px">
                                 <el-input v-model="attrForm.attr_Name" autocomplete="off"></el-input>
@@ -63,7 +63,7 @@
                             <el-form-item label="属性类型" label-width="100px">
                                 <el-select v-model="attrForm.attr_Type" placeholder="请选择属性类型">
                                     <el-option label="规格参数" value="1"></el-option>
-                                    <el-option label="销售属性" value="0"></el-option>
+                                    <el-option label="销售属性" value="0" disabled></el-option>
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="值类型" label-width="100px">
@@ -137,7 +137,8 @@ export default {
                 xflName: '',
                 groupName: '',
                 enable: '1',
-
+                attr_group_ID: '',
+                state: 'add',
             },
             // 添加/编辑的 dialog 是否显示
             dialogFormVisible: false,
@@ -267,18 +268,31 @@ export default {
             });
         },
         // 处理编辑
-        handleEdit(row) {
-            console.log("我点了编辑：", row);
-            // this.attrForm = row
-            // // this.attrForm.value_Select.push('aa')
-            // console.log("我在看attrForm：", this.attrForm);
-            // // console.log("值选择：", );
-            // this.value = row.value_Select.split('，')
-            // console.log(this.value);
-            // this.dialogFormVisible = true
+        async handleEdit(row) {
+            console.log("我点了编辑：", row)
+            this.dialogFormVisible = true
+            await this.$axios.post(`/adminAPI/Goods/attr_group/getGroup/${row.xflID}`).then(res => {
+                this.attrGroup = res.data.data
+            })
+            this.attrForm = {
+                attr_ID: row.attr_ID,
+                attr_Name: row.attr_Name,
+                attr_Type: row.attr_Type,
+                value_Type: row.value_Type,
+                value_Select: row.value_Select,
+                xflID: row.xflID,
+                attr_group_ID: row.attr_group_ID,
+                groupName: row.xflName,
+                enable: row.enable,
+                state: 'edit',
+            }
+            // this.value_Select = row.value_Select.split('，')
+            // console.log("我点了编辑：", row, this.attrGroup, this.attrForm);
+
         },
         // 处理删除 
         handleDelete(index, row) {
+            console.log('组ID：', row);
             this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -287,6 +301,14 @@ export default {
                 const arr = []
                 arr.push(row.attr_ID)
                 this.$axios.delete(`/adminAPI/Goods/attr/delAttr`, { data: arr }).then(res => {
+                    console.log("删除成功：", res);
+                    let val = [{
+                        attr_ID: row.attr_ID,
+                        attr_Group_ID: row.attr_group_ID
+                    }]
+                    this.$axios.delete("/adminAPI/Goods/attr_group_relation/delRelevance", { data: val }).then(resp => {
+                        console.log('resp:', resp);
+                    })
                     this.$message({
                         type: 'success',
                         message: '删除成功'
@@ -302,31 +324,49 @@ export default {
         },
         // 处理提交表单
         submitAttrForm() {
-            this.$axios.post("/adminAPI/Goods/attr/addAttr", this.attrForm).then(res => {
-                if (res.data.data.attr_ID) {
-                    this.$axios.post("/adminAPI/Goods/attr_group_relation/addRelation",
-                        {
+            if (this.attrForm.state === 'add') {
+                this.$axios.post("/adminAPI/Goods/attr/addAttr", this.attrForm).then(res => {
+                    if (res.data.data.attr_ID) {
+                        const data = []
+                        data.push({
                             attr_ID: res.data.data.attr_ID,
                             attr_Group_ID: this.attrForm.attr_group_ID
                         })
-                        .then(resp => {
-                            this.attr_group_relation.push(resp.data.data)
+                        this.$axios.post("/adminAPI/Goods/attr_group_relation/addRelation", data).then(resp => {
+                            this.$message({
+                                type: 'success',
+                                message: '添加成功'
+                            });
+                            this.getAttrGroupRelation()
                         })
-                }
-                this.dialogFormVisible = false;
-                this.attrForm = {}
-                this.getAttrList()
-            })
+                    }
+                })
+            } else if (this.attrForm.state === 'edit') {
+                this.$axios.put("/adminAPI/Goods/attr/putAttr", this.attrForm).then(res => {
+                    this.$axios.put("/adminAPI/Goods/attr_group_relation/putRelation", this.attrForm).then(resp => {
+                        this.$message({
+                            type: 'success',
+                            message: '编辑成功'
+                        });
+                    })
+                })
+            }
+            this.dialogFormVisible = false;
+            this.attrForm = {}
+            this.getAttrList()
         },
         // 处理分类被选中后逻辑
         handleClassificationChange(val) {
             if (val) {
-                this.$axios.post(`/adminAPI/Goods/attr_group/getGroup/${val.length}/${val[2]}`).then(res => {
+                this.$axios.post(`/adminAPI/Goods/attr_group/getGroup/${val[2]}`).then(res => {
                     this.attrGroup = res.data.data
                 })
             }
-
         },
+        closeDialog() {
+            this.attrForm = {}
+            this.dialogFormVisible = false
+        }
     },
 }
 </script>

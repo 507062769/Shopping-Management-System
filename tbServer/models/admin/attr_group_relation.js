@@ -24,8 +24,8 @@ const attrGroupRelation = sequelize.define(
   }
 );
 
-attrGroupRelation.sync().then(() => {
-  console.log("attr_attrgroup_relation模型同步成功");
-});
+// attrGroupRelation.sync().then(() => {
+//   console.log("attr_attrgroup_relation模型同步成功");
+// });
 
 module.exports = { attrGroupRelation };

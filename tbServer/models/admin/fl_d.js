@@ -20,8 +20,8 @@ const DFL = sequelize.define(
   }
 );
 
-DFL.sync().then(() => {
-  console.log("DFL模型同步成功");
-});
+// DFL.sync().then(() => {
+//   console.log("DFL模型同步成功");
+// });
 
 module.exports = { DFL };

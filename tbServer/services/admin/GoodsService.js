@@ -9,23 +9,10 @@ const GoodsService = {
   getGroupList: async () => {
     return attrGroup.findAll();
   },
-  getAttrGroup: async (level, ID) => {
-    switch (level) {
-      case "1":
-        return attrGroup.findAll({
-          where: { dflID: ID },
-        });
-      case "2":
-        return attrGroup.findAll({
-          where: { zflID: ID },
-        });
-      case "3":
-        return attrGroup.findAll({
-          where: { xflID: ID },
-        });
-      default:
-        return "错误";
-    }
+  getAttrGroup: async (xflID) => {
+    return attrGroup.findAll({
+      where: { xflID },
+    });
   },
   addGroup: async ({ attr_Group_Name, classificationID }) => {
     return attrGroup.create({
@@ -57,7 +44,7 @@ const GoodsService = {
       }
     );
   },
-  delGroup: (attr_Group_ID) => {
+  delGroup: ({ attr_Group_ID }) => {
     return attrGroup.destroy({ where: { attr_Group_ID } });
   },
   getRelevance: async (attr_Group_ID) => {
@@ -89,6 +76,27 @@ const GoodsService = {
       value_Type,
       xflID: xflID[2],
     });
+  },
+  putAttr: async ({
+    attr_ID,
+    attr_Name,
+    attr_Type,
+    value_Type,
+    value_Select,
+    xflID,
+    enable,
+  }) => {
+    return attr.update(
+      {
+        attr_Name,
+        attr_Type,
+        value_Type,
+        value_Select,
+        xflID,
+        enable,
+      },
+      { where: { attr_ID } }
+    );
   },
   getAttr: async (level, ID, attr_Type) => {
     switch (level) {
@@ -135,11 +143,42 @@ const GoodsService = {
       attr_Group_ID,
     });
   },
+  putRelation: ({ attr_ID, attr_group_ID }) => {
+    console.log("法王：", attr_ID, attr_group_ID);
+    return attrGroupRelation.update(
+      {
+        attr_ID,
+        attr_Group_ID: attr_group_ID,
+      },
+      {
+        where: {
+          attr_ID,
+        },
+      }
+    );
+  },
   getRelationList: async () => {
     return attrGroupRelation.findAll();
   },
-  delAttrGroupRelation: async (attr_ID) => {
-    return attrGroupRelation.destroy({ where: { attr_ID } });
+  delRelevance: async ({ attr_ID, attr_Group_ID }) => {
+    return attrGroupRelation.destroy({ where: { attr_ID, attr_Group_ID } });
+  },
+  getRelationIDByID: async () => {
+    return attrGroupRelation.findAll({
+      attributes: ["attr_ID"],
+    });
+  },
+  getAttrByXflID: async (xflID, attr_IDList) => {
+    return attr.findAll({
+      where: {
+        xflID: {
+          [Op.eq]: xflID,
+        },
+        attr_ID: {
+          [Op.notIn]: attr_IDList,
+        },
+      },
+    });
   },
 };
 

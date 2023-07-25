@@ -10,7 +10,7 @@
                     <el-input v-model="attrGroupName" placeholder="参数名"></el-input>
                     <el-button type="success" round @click="groupNameSearch">查询</el-button>
                     <el-button type="primary" round @click="handleAddGroup">新增</el-button>
-                    <el-button type="danger" round @click="handleBatchDelData">批量删除</el-button>
+                    <el-button type="danger" round @click="handleDelete">批量删除</el-button>
                 </div>
                 <div class="attrList">
                     <el-table border ref="multipleTable" :data="attrGroupData" tooltip-effect="dark" style="width: 100%"
@@ -64,23 +64,25 @@
             </div>
         </el-dialog>
 
-        <el-dialog title="关联属性" :visible.sync="relevanceVisible" :before-close="closeRelevance">
+        <el-dialog title="关联属性" :visible.sync="relevanceVisible">
+            <el-button type="primary" round @click="handleAddRelevance">新建关联</el-button>
+            <el-button type="danger" round @click="removeRelevance">批量删除</el-button>
             <el-table ref="relevanceRef" :data="relevanceData" tooltip-effect="dark" style="width: 100%"
-                @selection-change="handleRelevanceSelectionChange">
+                @selection-change="handleSelectionChange">
                 <el-table-column type="selection" width="55" align="center">
                 </el-table-column>
                 <el-table-column prop="attr_ID" label="ID" width="120" align="center">
                 </el-table-column>
                 <el-table-column prop="attr_Name" label="属性名" width="120" align="center">
                 </el-table-column>
-                <el-table-column prop="value_Select" label="可选值" align="center">
+                <!-- <el-table-column prop="value_Select" label="可选值" align="center">
                     <template slot-scope="scope">
                         <el-popover trigger="hover" placement="top">
                             <p>{{ scope.row.value_Select }}</p>
                             <el-tag slot="reference" size="medium">{{ scope.row.value_Select }}</el-tag>
                         </el-popover>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column label="操作" width="190" align="center">
                     <template slot-scope="scope">
                         <el-button size="mini" type="danger"
@@ -89,6 +91,34 @@
                 </el-table-column>
             </el-table>
         </el-dialog>
+
+        <el-dialog title="选择属性" :visible.sync="addRelevanceVisible" width="500px">
+            <el-table :data="attrByRelevanceData" @selection-change="handleSelectionChange">
+                <el-table-column type="selection" width="50" align="center" fixed>
+                </el-table-column>
+                <el-table-column prop="attr_Name" label="属性名" width="120" align="center">
+                </el-table-column>
+                <el-table-column prop="value_Type" label="值类型" width="80" align="center">
+                    <template slot-scope="scope">
+                        <el-tag size="medium" v-show="scope.row.value_Type === '0'">多值</el-tag>
+                        <el-tag size="medium" v-show="scope.row.value_Type === '1'">单值</el-tag>
+                    </template>
+                </el-table-column>
+                <el-table-column prop="value_Select" label="可选值" width="180" align="center">
+                    <template slot-scope="scope">
+                        <el-popover trigger="hover" placement="top">
+                            <p>{{ scope.row.value_Select }}</p>
+                            <el-tag slot="reference" size="medium">{{ scope.row.value_Select }}</el-tag>
+                        </el-popover>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="addRelevanceVisible = false">取 消</el-button>
+                <el-button type="primary" @click="selectRelevanceSubmit">添加关联</el-button>
+            </div>
+        </el-dialog>
+
     </div>
 </template>
 
@@ -108,6 +138,7 @@ export default {
             // 添加页面是否展示
             addGroupVisible: false,
             relevanceVisible: false,
+            addRelevanceVisible: false,
             // 要添加的数据
             addGroupForm: {
                 state: 'add'
@@ -123,6 +154,7 @@ export default {
             },
             batchDelData: [],
             relevanceData: [],
+            attrByRelevanceData: [],
         }
     },
     create() { },
@@ -150,14 +182,13 @@ export default {
                 cancelButtonText: '取消',
                 type: 'warning'
             }).then(() => {
-                const arr = []
-                arr.push(row.attr_Group_ID)
-                this.$axios.delete(`/adminAPI/Goods/attr_group/delGroup`, { data: arr }).then(res => {
+                row && (this.batchDelData = [], this.batchDelData.push(row))
+                this.$axios.delete(`/adminAPI/Goods/attr_group/delGroup`, { data: this.batchDelData }).then(res => {
                     this.$message({
                         type: 'success',
                         message: '删除成功！'
                     })
-                    this.attrGroupData.splice(index, 1)
+                    this.getGroupList()
                 })
 
             }).catch(() => {
@@ -167,22 +198,12 @@ export default {
                 });
             });
         },
-        handleBatchDelData() {
-            this.$axios.delete(`/adminAPI/Goods/attr_group/delGroup`, { data: this.batchDelData }).then(res => {
-                this.$message({
-                    type: 'success',
-                    message: '删除成功！'
-                })
-            })
-        },
         handleSelectionChange(val) {
             this.batchDelData = []
             val.forEach(item => {
-                this.batchDelData.push(item.attr_Group_ID)
+                this.batchDelData.push(item)
             });
-        },
-        handleRelevanceSelectionChange(val) {
-            console.log("handleRelevanceSelectionChange:", val);
+            console.log("当前复选框中有：", this.batchDelData);
         },
         handleSizeChange(val) {
             console.log(`每页 ${val} 条`);
@@ -206,13 +227,39 @@ export default {
         },
         handleRelevance(row) {
             this.relevanceVisible = true
+            localStorage.setItem("currentGroup", JSON.stringify(row))
+            console.log('row:', row);
             this.$axios.post(`/adminAPI/Goods/attr_group/getRelevance/${row.attr_Group_ID}`).then(res => {
-                console.log("关联成功：", res);
+                console.log('res:', res);
                 this.relevanceData = res.data.data
+                for (let i = 0; i < this.relevanceData.length; i++) {
+                    this.relevanceData[i].attr_Group_ID = row.attr_Group_ID
+                }
             })
         },
         removeRelevance(index, row) {
-            console.log("要移除：", index, row);
+            this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
+                confirmButtonText: '确定',
+                cancelButtonText: '取消',
+                type: 'warning'
+            }).then(() => {
+                row && (this.batchDelData = [], this.batchDelData.push(row))
+                this.$axios.delete("/adminAPI/Goods/attr_group_relation/delRelevance",
+                    { data: this.batchDelData })
+                    .then(res => {
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功！'
+                        })
+                        this.handleRelevance(JSON.parse(localStorage.getItem("currentGroup")))
+                    })
+            }).catch(() => {
+                this.$message({
+                    type: 'info',
+                    message: '已取消删除'
+                });
+            });
+
         },
         handleAddGroup() {
             this.addGroupVisible = true
@@ -221,7 +268,6 @@ export default {
             }
         },
         addGroup() {
-            console.log("要穿的值：", this.addGroupForm);
             if (this.addGroupForm.state === 'edit') {
                 this.$axios.put("/adminAPI/Goods/attr_group/putGroup", this.addGroupForm).then(res => {
                     this.addGroupVisible = false
@@ -243,10 +289,6 @@ export default {
             this.addGroupVisible = false;
             this.addGroupForm = {}
         },
-        closeRelevance() {
-            this.relevanceVisible = false;
-            this.relevanceForm = {}
-        },
         groupNameSearch() {
             this.attrGroupName !== '' ?
                 this.$axios.post(`/adminAPI/Goods/attr_group/searchName/${this.attrGroupName}`).then(res => {
@@ -254,7 +296,30 @@ export default {
                 }) :
                 this.getGroupList()
         },
+        handleAddRelevance() {
+            this.addRelevanceVisible = true
+            this.$axios.get("/adminAPI/Goods/attr_group_relation/getNotGroupRelation",
+                { params: { currentGroup: JSON.parse(localStorage.getItem("currentGroup")) } })
+                .then(res => {
+                    console.log("res:", res);
+                    this.attrByRelevanceData = res.data.data
+                })
+        },
+        selectRelevanceSubmit() {
+            let data = JSON.parse(localStorage.getItem("currentGroup"))
+            this.batchDelData.forEach(val => {
+                val.attr_Group_ID = data.attr_Group_ID
+            })
+            this.$axios.post("/adminAPI/Goods/attr_group_relation/addRelation", this.batchDelData).then(res => {
+                this.$message({
+                    type: 'success',
+                    message: '关联成功!'
+                })
+                this.addRelevanceVisible = false;
+                this.handleRelevance(data)
 
+            })
+        },
     },
 }
 </script>
