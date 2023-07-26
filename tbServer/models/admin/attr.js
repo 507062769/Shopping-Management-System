@@ -24,6 +24,14 @@ const attr = sequelize.define(
       type: Sequelize.CHAR, // 字段类型
       allowNull: false,
     },
+    dflID: {
+      type: Sequelize.INTEGER.UNSIGNED, // 字段类型
+      allowNull: false,
+    },
+    zflID: {
+      type: Sequelize.INTEGER.UNSIGNED, // 字段类型
+      allowNull: false,
+    },
     xflID: {
       type: Sequelize.INTEGER.UNSIGNED, // 字段类型
       allowNull: false,

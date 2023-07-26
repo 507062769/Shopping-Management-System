@@ -171,7 +171,7 @@ export default {
             })
         },
         getGroupList() {
-            this.$axios.get("/adminAPI/Goods/attr_group/getGroupList").then(res => {
+            this.$axios.get("/adminAPI/Platform/attr_group/getGroupList").then(res => {
                 this.attrGroupData = res.data.data
                 localStorage.setItem("attr_group_list", JSON.stringify(this.attrGroupData))
             })
@@ -183,14 +183,15 @@ export default {
                 type: 'warning'
             }).then(() => {
                 row && (this.batchDelData = [], this.batchDelData.push(row))
-                this.$axios.delete(`/adminAPI/Goods/attr_group/delGroup`, { data: this.batchDelData }).then(res => {
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功！'
+                this.$axios.delete(`/adminAPI/Platform/attr_group/delGroup`, { data: this.batchDelData }).then(res => {
+                    this.$axios.delete('/adminAPI/Platform/attr_group_relation/delRelevanceByGroup', { data: this.batchDelData }).then(resp => {
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功！'
+                        })
                     })
                     this.getGroupList()
                 })
-
             }).catch(() => {
                 this.$message({
                     type: 'info',
@@ -203,7 +204,6 @@ export default {
             val.forEach(item => {
                 this.batchDelData.push(item)
             });
-            console.log("当前复选框中有：", this.batchDelData);
         },
         handleSizeChange(val) {
             console.log(`每页 ${val} 条`);
@@ -212,7 +212,7 @@ export default {
             console.log(`当前页: ${val}`);
         },
         handleClickTree(data, node, component) {
-            this.$axios.post(`/adminAPI/Goods/attr_group/getGroup/${node.level}/${data.ID}`).then(res => {
+            this.$axios.post(`/adminAPI/Platform/attr_group/getGroup/${node.level}/${data.ID}`).then(res => {
                 this.attrGroupData = res.data.data
             })
         },
@@ -228,9 +228,7 @@ export default {
         handleRelevance(row) {
             this.relevanceVisible = true
             localStorage.setItem("currentGroup", JSON.stringify(row))
-            console.log('row:', row);
-            this.$axios.post(`/adminAPI/Goods/attr_group/getRelevance/${row.attr_Group_ID}`).then(res => {
-                console.log('res:', res);
+            this.$axios.post(`/adminAPI/Platform/attr_group/getRelevance/${row.attr_Group_ID}`).then(res => {
                 this.relevanceData = res.data.data
                 for (let i = 0; i < this.relevanceData.length; i++) {
                     this.relevanceData[i].attr_Group_ID = row.attr_Group_ID
@@ -244,7 +242,7 @@ export default {
                 type: 'warning'
             }).then(() => {
                 row && (this.batchDelData = [], this.batchDelData.push(row))
-                this.$axios.delete("/adminAPI/Goods/attr_group_relation/delRelevance",
+                this.$axios.delete("/adminAPI/Platform/attr_group_relation/delRelevance",
                     { data: this.batchDelData })
                     .then(res => {
                         this.$message({
@@ -269,7 +267,7 @@ export default {
         },
         addGroup() {
             if (this.addGroupForm.state === 'edit') {
-                this.$axios.put("/adminAPI/Goods/attr_group/putGroup", this.addGroupForm).then(res => {
+                this.$axios.put("/adminAPI/Platform/attr_group/putGroup", this.addGroupForm).then(res => {
                     this.addGroupVisible = false
                     this.$message({
                         type: 'success',
@@ -279,7 +277,7 @@ export default {
                 })
             } else if (this.addGroupForm.state === 'add') {
                 this.addGroupVisible = false
-                this.$axios.post("/adminAPI/Goods/attr_group/addGroup", this.addGroupForm).then(res => {
+                this.$axios.post("/adminAPI/Platform/attr_group/addGroup", this.addGroupForm).then(res => {
                     this.attrGroupData.push(res.data.data)
                 })
             }
@@ -291,17 +289,16 @@ export default {
         },
         groupNameSearch() {
             this.attrGroupName !== '' ?
-                this.$axios.post(`/adminAPI/Goods/attr_group/searchName/${this.attrGroupName}`).then(res => {
+                this.$axios.post(`/adminAPI/Platform/attr_group/searchName/${this.attrGroupName}`).then(res => {
                     this.attrGroupData = res.data.data
                 }) :
                 this.getGroupList()
         },
         handleAddRelevance() {
             this.addRelevanceVisible = true
-            this.$axios.get("/adminAPI/Goods/attr_group_relation/getNotGroupRelation",
+            this.$axios.get("/adminAPI/Platform/attr_group_relation/getNotGroupRelation",
                 { params: { currentGroup: JSON.parse(localStorage.getItem("currentGroup")) } })
                 .then(res => {
-                    console.log("res:", res);
                     this.attrByRelevanceData = res.data.data
                 })
         },
@@ -310,7 +307,7 @@ export default {
             this.batchDelData.forEach(val => {
                 val.attr_Group_ID = data.attr_Group_ID
             })
-            this.$axios.post("/adminAPI/Goods/attr_group_relation/addRelation", this.batchDelData).then(res => {
+            this.$axios.post("/adminAPI/Platform/attr_group_relation/addRelation", this.batchDelData).then(res => {
                 this.$message({
                     type: 'success',
                     message: '关联成功!'

@@ -27,16 +27,23 @@
                     <span slot="title">分类管理</span>
                 </el-menu-item>
 
-                <el-submenu index="/goods-manage">
+                <el-submenu index="/platform-manage">
                     <template slot="title">
-                        <i class="el-icon-s-goods"></i>
-                        <span>商品管理</span>
+                        <i class="el-icon-s-tools"></i>
+                        <span>平台属性</span>
                     </template>
                     <el-menu-item index="/attrGroup">属性分组</el-menu-item>
                     <el-menu-item index="/specification">规格参数</el-menu-item>
                     <el-menu-item index="/saleAttr">销售属性</el-menu-item>
+                </el-submenu>
+
+                <el-submenu index="/goods-manage">
+                    <template slot="title">
+                        <i class="el-icon-s-goods"></i>
+                        <span>商品维护</span>
+                    </template>
                     <el-menu-item index="/goodsAdd">添加商品</el-menu-item>
-                    <el-menu-item index="/goodsList">商品列表</el-menu-item>
+                    <el-menu-item index="/goodsList">商品管理</el-menu-item>
                 </el-submenu>
 
                 <el-menu-item index="/transaction">

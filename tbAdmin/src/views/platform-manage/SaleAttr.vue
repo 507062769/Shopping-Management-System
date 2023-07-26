@@ -9,11 +9,11 @@
                     <el-input v-model="searchAttrName" placeholder="请输入要搜索的属性名" clearable></el-input>
                     <el-button type="success" round @click="attrNameSearch">查询</el-button>
                     <el-button type="primary" round @click="handleAddAttr">新增</el-button>
-                    <el-button type="danger" round @click="handleBatchDelData">批量删除</el-button>
+                    <el-button type="danger" round @click="handleDelete">批量删除</el-button>
                 </div>
                 <div class="attrList">
                     <el-table border ref="multipleTable" :data="attrData" tooltip-effect="dark" style="width: 100%"
-                        max-height="500" @selection-change="handleSelectionChange">
+                        max-height="700" @selection-change="handleSelectionChange">
                         <el-table-column type="selection" width="50" align="center" fixed>
                         </el-table-column>
                         <el-table-column prop="attr_ID" label="属性ID" width="70" align="center" fixed>
@@ -42,6 +42,8 @@
                         </el-table-column>
                         <el-table-column prop="xflName" label="所属类别" width="80" align="center">
                         </el-table-column>
+                        <!-- <el-table-column prop="groupName" label="所属分组" width="80" align="center">
+                        </el-table-column> -->
                         <el-table-column prop="enable" label="是否可见" width="80" align="center">
                         </el-table-column>
                         <el-table-column label="操作" width="190" align="center" fixed="right">
@@ -53,7 +55,7 @@
                         </el-table-column>
                     </el-table>
 
-                    <el-dialog title="添加属性" :visible.sync="dialogFormVisible">
+                    <el-dialog title="添加属性" :visible.sync="dialogFormVisible" :before-close="closeDialog">
                         <el-form :model="attrForm">
                             <el-form-item label="属性名称" label-width="100px">
                                 <el-input v-model="attrForm.attr_Name" autocomplete="off"></el-input>
@@ -76,8 +78,8 @@
                                 </el-select>
                             </el-form-item>
                             <el-form-item label="所属分类" label-width="100px">
-                                <el-cascader v-model="attrForm.xflID" :options="classificationList" :props="zdyOption"
-                                    clearable filterable @change="handleClassificationChange">
+                                <el-cascader v-model="attrForm.classifition" :options="classificationList"
+                                    :props="zdyOption" clearable filterable>
                                     <template slot-scope="{ node, data }">
                                         <span>{{ data.Name }}</span>
                                         <span v-if="!node.isLeaf"> ({{ data.children.length }}) </span>
@@ -123,11 +125,12 @@ export default {
                 attr_ID: '',
                 attr_Name: '',
                 attr_Type: '',
-                value_Type: '0',
+                value_Type: '',
                 value_Select: '',
+                classifition: '',
                 xflName: '',
                 enable: '1',
-
+                state: 'add',
             },
             // 添加/编辑的 dialog 是否显示
             dialogFormVisible: false,
@@ -139,8 +142,6 @@ export default {
                 label: 'Name',
                 children: 'children'
             },
-            // 属性组的内容
-            attrGroup: [],
             // 属性与组的关系字段
             attr_group_relation: [],
             batchDelData: [],
@@ -148,8 +149,6 @@ export default {
     },
     create() { },
     mounted() {
-        // this.getAttrGroupRelation()
-
         this.getAttrList()
         this.getClassificationList()
     },
@@ -162,7 +161,23 @@ export default {
         },
         // 获取属性列表并显示对应的名称
         getAttrList() {
-            this.$axios.get(`/adminAPI/Goods/attr/getAttrList`, { params: { 'attr_Type': '0' } }).then(res => {
+            this.$axios.get(`/adminAPI/Platform/attr/getAttrList`, { params: { 'attr_Type': '0' } }).then(res => {
+                this.attrData = res.data.data
+                this.attrData.forEach(data => {
+                    this.classificationList.forEach(Dfl => {
+                        Dfl["children"].forEach(Zfl => {
+                            Zfl["children"].forEach(xfl => {
+                                if (data.xflID === xfl.ID) data['xflName'] = xfl.Name
+                            })
+                        })
+                    });
+                })
+            })
+        },
+        // 处理点击分类后的逻辑
+        handleClickTree(data, node, component) {
+            console.log('点击的数据：', data, "节点是：", node);
+            this.$axios.post(`/adminAPI/Platform/attr/getAttr/${node.level}/${data.ID}`, { attr_Type: '0' }).then(res => {
                 this.attrData = res.data.data
                 const attrGroupList = JSON.parse(localStorage.getItem("attr_group_list"))
                 this.attrData.forEach(data => {
@@ -186,20 +201,9 @@ export default {
                 })
             })
         },
-
-        // getAttrGroupRelation() {
-        //     this.$axios.get("/adminAPI/Goods/attr_group_relation/getList").then(res => {
-        //         this.attr_group_relation = res.data.data
-        //     })
-        // },
-        // 处理点击分类后的逻辑
-        handleClickTree(data, node, component) {
-
-        },
-
         // 处理点搜索按钮后逻辑
         attrNameSearch() {
-            this.searchAttrName !== '' ? this.$axios.post(`/adminAPI/Goods/attr/searchName`, { searchName: this.searchAttrName, attr_Type: '0' }).then(res => {
+            this.searchAttrName !== '' ? this.$axios.post(`/adminAPI/Platform/attr/searchName`, { searchName: this.searchAttrName, attr_Type: '0' }).then(res => {
                 console.log(res);
                 this.attrData = res.data.data
             }) : this.getAttrList()
@@ -208,44 +212,35 @@ export default {
         handleAddAttr() {
             this.dialogFormVisible = true
         },
-        // 处理批量删除
-        handleBatchDelData() {
-            this.$confirm('此操作将永久删除该记录, 是否继续?', '提示', {
-                confirmButtonText: '确定',
-                cancelButtonText: '取消',
-                type: 'warning'
-            }).then(() => {
-                this.$axios.delete(`/adminAPI/Goods/attr/delAttr`, { data: this.batchDelData }).then(res => {
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功！'
-                    })
-                    this.getAttrList()
-                })
-            }).catch(() => {
-                this.$message({
-                    type: 'info',
-                    message: '已取消删除'
-                });
-            });
-        },
-        //  处理 选中分类后的逻辑
+        //  处理 多选分类后的逻辑
         handleSelectionChange(val) {
             this.batchDelData = []
             val.forEach(item => {
-                this.batchDelData.push(item.attr_ID)
+                this.batchDelData.push({ attr_ID: item.attr_ID })
             });
         },
         // 处理编辑
-        handleEdit(row) {
-            console.log("我点了编辑：", row);
-            // this.attrForm = row
-            // // this.attrForm.value_Select.push('aa')
-            // console.log("我在看attrForm：", this.attrForm);
-            // // console.log("值选择：", );
-            // this.value = row.value_Select.split('，')
-            // console.log(this.value);
-            // this.dialogFormVisible = true
+        async handleEdit(row) {
+            console.log("我点了编辑：", row)
+            this.dialogFormVisible = true
+            await this.$axios.post(`/adminAPI/Platform/attr_group/getGroup/${row.xflID}`).then(res => {
+                this.attrGroup = res.data.data
+            })
+            this.attrForm = {
+                attr_ID: row.attr_ID,
+                attr_Name: row.attr_Name,
+                attr_Type: row.attr_Type,
+                value_Type: row.value_Type,
+                value_Select: row.value_Select,
+                xflID: row.xflID,
+                attr_group_ID: row.attr_group_ID,
+                groupName: row.xflName,
+                enable: row.enable,
+                state: 'edit',
+            }
+            // this.value_Select = row.value_Select.split('，')
+            // console.log("我点了编辑：", row, this.attrGroup, this.attrForm);
+
         },
         // 处理删除 
         handleDelete(index, row) {
@@ -253,15 +248,16 @@ export default {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
-            }).then(() => {
-                const arr = []
-                arr.push(row.attr_ID)
-                this.$axios.delete(`/adminAPI/Goods/attr/delAttr`, { data: arr }).then(res => {
-                    this.$message({
-                        type: 'success',
-                        message: '删除成功'
-                    });
-                    this.attrData.pop(index)
+            }).then(async () => {
+                row && (this.batchDelData = [], this.batchDelData.push(row))
+                this.$axios.delete(`/adminAPI/Platform/attr/delAttr`, { data: this.batchDelData }).then(res => {
+                    this.$axios.delete("/adminAPI/Platform/attr_group_relation/delRelevanceByAttr", { data: this.batchDelData }).then(resp => {
+                        this.$message({
+                            type: 'success',
+                            message: '删除成功'
+                        });
+                        this.getAttrList()
+                    })
                 })
             }).catch(() => {
                 this.$message({
@@ -271,32 +267,41 @@ export default {
             });
         },
         // 处理提交表单
-        submitAttrForm() {
-            this.$axios.post("/adminAPI/Goods/attr/addAttr", this.attrForm).then(res => {
-                if (res.data.data.attr_ID) {
-                    this.$axios.post("/adminAPI/Goods/attr_group_relation/addRelation",
-                        {
-                            attr_ID: res.data.data.attr_ID,
-                            attr_Group_ID: this.attrForm.attr_group_ID
-                        })
-                        .then(resp => {
-                            this.attr_group_relation.push(resp.data.data)
-                        })
-                }
-                this.dialogFormVisible = false;
-                this.attrForm = {}
-                this.getAttrList()
-            })
-        },
-        // 处理分类被选中后逻辑
-        handleClassificationChange(val) {
-            if (val) {
-                this.$axios.post(`/adminAPI/Goods/attr_group/getGroup/${val.length}/${val[2]}`).then(res => {
-                    this.attrGroup = res.data.data
+        async submitAttrForm() {
+            if (this.attrForm.state === 'add') {
+                await this.$axios.post("/adminAPI/Platform/attr/addAttr", this.attrForm).then(res => {
+                    this.$message({
+                        type: 'success',
+                        message: '添加成功！'
+                    })
+                    this.attrForm = {
+                        attr_ID: '',
+                        attr_Name: '',
+                        attr_Type: '',
+                        value_Type: '1',
+                        value_Select: '',
+                        xflName: '',
+                        groupName: '',
+                        enable: '1',
+                        attr_group_ID: '',
+                        state: 'add',
+                    }
+                })
+            } else if (this.attrForm.state === 'edit') {
+                this.$axios.put("/adminAPI/Platform/attr/putAttr", this.attrForm).then(res => {
+                    this.$message({
+                        type: 'success',
+                        message: '编辑成功！'
+                    })
                 })
             }
-
+            this.getAttrList()
+            this.dialogFormVisible = false;
         },
+        closeDialog() {
+            this.attrForm = {}
+            this.dialogFormVisible = false
+        }
     },
 }
 </script>

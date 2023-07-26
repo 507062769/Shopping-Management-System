@@ -45,17 +45,17 @@ const routes = [
   {
     name: "AttrGroup",
     path: "/attrGroup",
-    component: () => import("../views/goods-manage/AttrGroup.vue"),
+    component: () => import("../views/platform-manage/AttrGroup.vue"),
   },
   {
     name: "SaleAttr",
     path: "/saleAttr",
-    component: () => import("../views/goods-manage/SaleAttr.vue"),
+    component: () => import("../views/platform-manage/SaleAttr.vue"),
   },
   {
     name: "Specification",
     path: "/specification",
-    component: () => import("../views/goods-manage/Specifications.vue"),
+    component: () => import("../views/platform-manage/Specifications.vue"),
   },
 
   {
