@@ -42,9 +42,22 @@
             <el-col :span="24" v-show="this.scheduleActive === 1">
                 <el-card class="box-card">
                     <el-tabs tab-position="left">
-                        <el-tab-pane :label="data.attr_Group_Name" :key="data.attr_Group_ID"
-                            v-for="(data, index) in attrGroup">
-
+                        <el-tab-pane :label="group.attr_Group_Name" :key="group.attr_Group_ID"
+                            v-for="(group, gIndex) in attrGroup">
+                            <el-form :model="specificationsForm" :rules="specificationsRules" ref="specificationsRef"
+                                label-width="100px" class="demo-ruleForm">
+                                <el-form-item :label="attr.attr_Name" prop="name" v-for="(attr, attrIndex) in group.attr">
+                                    <el-select v-model="specificationsForm[attrIndex]" filterable placeholder="请选择">
+                                        <el-option v-for="(val, valIndex) in attr.value_Select.split('，')" :key="valIndex"
+                                            :label="val" :value="val">
+                                        </el-option>
+                                    </el-select>
+                                </el-form-item>
+                                <el-form-item>
+                                    <el-button style="margin-top: 12px;" @click="back">上一步</el-button>
+                                    <el-button style="margin-top: 12px;" @click="next">下一步</el-button>
+                                </el-form-item>
+                            </el-form>
                         </el-tab-pane>
                     </el-tabs>
                 </el-card>
@@ -92,6 +105,10 @@ export default {
                 children: 'children'
             },
             attrGroup: [],
+            specificationsForm: {},
+            specificationsRules: {
+
+            },
         }
     },
     create() { },
@@ -112,8 +129,8 @@ export default {
                     break;
                 case 1:
                     this.$axios.post(`/adminAPI/goods/getGroupByxflID/${this.goodsForm.classification[2]}`).then(res => {
-                        console.log("请求结果：", res);
                         this.attrGroup = res.data.data
+                        console.log('attrGroup:', this.attrGroup);
                     })
                     break;
                 case 2:
