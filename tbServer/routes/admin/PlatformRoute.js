@@ -8,7 +8,7 @@ PlatformRoute.get(
 );
 
 PlatformRoute.post(
-  "/Platform/attr_group/getGroup/:id",
+  "/Platform/attr_group/getGroup/:level/:id",
   PlatformController.getAttrGroup
 );
 PlatformRoute.post(

@@ -12,13 +12,15 @@ const PlatformController = {
     });
   },
   getAttrGroup: async (req, res) => {
-    await PlatformService.getAttrGroup(req.params.id).then((resp) => {
-      res.send({
-        code: 200,
-        msg: "成功",
-        data: resp,
-      });
-    });
+    await PlatformService.getAttrGroup(req.params.level, req.params.id).then(
+      (resp) => {
+        res.send({
+          code: 200,
+          msg: "成功",
+          data: resp,
+        });
+      }
+    );
   },
   addGroup: async (req, res) => {
     await PlatformService.addGroup(req.body).then((resp) => {

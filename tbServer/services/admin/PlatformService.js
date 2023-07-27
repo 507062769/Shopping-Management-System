@@ -9,10 +9,23 @@ const PlatformService = {
   getGroupList: async () => {
     return attrGroup.findAll();
   },
-  getAttrGroup: async (xflID) => {
-    return attrGroup.findAll({
-      where: { xflID },
-    });
+  getAttrGroup: async (level, ID) => {
+    switch (level) {
+      case "1":
+        return attrGroup.findAll({
+          where: { dflID: ID },
+        });
+      case "2":
+        return attrGroup.findAll({
+          where: { zflID: ID },
+        });
+      case "3":
+        return attrGroup.findAll({
+          where: { xflID: ID },
+        });
+      default:
+        return "错误";
+    }
   },
   addGroup: async ({ attr_Group_Name, classificationID }) => {
     return attrGroup.create({
