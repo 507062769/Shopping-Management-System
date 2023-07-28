@@ -12,7 +12,10 @@ const GoodsService = {
     return attrGroupRelation.findAll({ where: { attr_Group_ID } });
   },
   getAttrNameByAttrID: async (attr_ID) => {
-    return attr.findAll({ where: { attr_ID } });
+    return attr.findAll({ where: { attr_ID, attr_Type: 1 } });
+  },
+  getSalaAttrByxflID: async (xflID) => {
+    return attr.findAll({ where: { xflID, attr_Type: 0 } });
   },
 };
 

@@ -343,11 +343,12 @@ export default {
         // 处理分类被选中后逻辑
         handleClassificationChange(val) {
             if (val) {
-                this.$axios.post(`/adminAPI/Platform/attr_group/getGroup/${val[2]}`).then(res => {
+                this.$axios.post(`/adminAPI/Platform/attr_group/getGroup/${val.length}/${val[2]}`).then(res => {
                     this.attrGroup = res.data.data
                 })
             }
         },
+
         closeDialog() {
             this.attrForm = {}
             this.dialogFormVisible = false

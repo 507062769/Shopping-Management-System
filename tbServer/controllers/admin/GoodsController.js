@@ -9,15 +9,15 @@ const GoodsController = {
         attrGroup.push(resp[i].dataValues);
         await GoodsService.getAttrByGroupID(attrGroup[i].attr_Group_ID).then(
           async (respo) => {
-            const v = [];
+            const attr = [];
             if (respo.length !== 0) {
               for (let j = 0; j < respo.length; j++) {
                 await GoodsService.getAttrNameByAttrID(
                   respo[j].dataValues.attr_ID
                 ).then((response) => {
-                  if (resp[i].attr_Group_ID === respo[i].attr_Group_ID) {
-                    v.push(response[0].dataValues);
-                    attrGroup[i]["attr"] = v;
+                  if (resp[i].attr_Group_ID === respo[j].attr_Group_ID) {
+                    attr.push(response[0].dataValues);
+                    attrGroup[i]["attr"] = attr;
                   }
                 });
               }
@@ -30,6 +30,15 @@ const GoodsController = {
       code: 200,
       msg: "成功",
       data: attrGroup,
+    });
+  },
+  getSalaAttrByxflID: async (req, res) => {
+    await GoodsService.getSalaAttrByxflID(req.params.xflID).then((resp) => {
+      res.send({
+        code: 200,
+        msg: "成功",
+        data: resp,
+      });
     });
   },
 };

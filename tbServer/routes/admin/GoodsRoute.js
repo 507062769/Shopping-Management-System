@@ -7,4 +7,9 @@ GoodsRoute.post(
   GoodsController.getGroupByxflID
 );
 
+GoodsRoute.post(
+  "/goods/getSalaAttrByxflID/:xflID",
+  GoodsController.getSalaAttrByxflID
+);
+
 module.exports = GoodsRoute;
