@@ -14,25 +14,24 @@
             </el-col>
             <el-col :span="24" v-show="this.scheduleActive === 0">
                 <el-card class="box-card">
-                    <el-form :model="goodsBaseAttrForm" :rules="goodsBaseAttrRules" ref="goodsBaseAttrRef"
-                        label-width="100px" class="demo-ruleForm">
+                    <el-form :model="spu" :rules="goodsBaseAttrRules" ref="goodsBaseAttrRef" label-width="100px"
+                        class="demo-ruleForm">
                         <el-form-item label="商品名称" prop="name">
-                            <el-input v-model="goodsBaseAttrForm.goodsName"></el-input>
+                            <el-input v-model="spu.goodsName"></el-input>
                         </el-form-item>
                         <el-form-item label="商品描述" prop="desc">
-                            <el-input v-model="goodsBaseAttrForm.goodsDesc"></el-input>
+                            <el-input v-model="spu.goodsDesc"></el-input>
                         </el-form-item>
                         <el-form-item label="选择分类" prop="classification">
-                            <el-cascader v-model="goodsBaseAttrForm.classification" :options="classificationList"
-                                :props="zdyOption" clearable filterable>
+                            <el-cascader v-model="spu.classification" :options="classificationList" :props="zdyOption"
+                                clearable filterable>
                                 <template slot-scope="{ node, data }">
                                     <span>{{ data.Name }}</span>
                                 </template>
                             </el-cascader>
                         </el-form-item>
                         <el-form-item label="商品重量(kg)" prop="desc">
-                            <el-input-number v-model="goodsBaseAttrForm.weight" :precision="2"
-                                :step="0.1"></el-input-number>
+                            <el-input-number v-model="spu.weight" :precision="2" :step="0.1"></el-input-number>
                         </el-form-item>
                         <el-form-item>
                             <el-button style="margin-top: 12px;" @click="next">下一步</el-button>
@@ -40,16 +39,18 @@
                     </el-form>
                 </el-card>
             </el-col>
+
             <el-col :span="24" v-show="this.scheduleActive === 1">
                 <el-card class="box-card">
                     <el-tabs tab-position="left">
                         <el-tab-pane :label="group.attr_Group_Name" :key="group.attr_Group_ID"
                             v-for="(group, gIndex) in attrGroup">
-                            <el-form :model="specificationsForm.gIndex" :rules="specificationsRules" ref="specificationsRef"
-                                label-width="100px" class="demo-ruleForm">
+                            <el-form :model="spu" :rules="specificationsRules" ref="specificationsRef" label-width="100px"
+                                class="demo-ruleForm">
                                 <el-form-item :label="attr.attr_Name" :key="attr.attr_ID"
                                     v-for="(attr, attrIndex) in group.attr">
-                                    <el-select v-model="specificationsForm[gIndex][attrIndex]" filterable placeholder="请选择">
+                                    <el-select v-model="dataResp.specificationsForm[gIndex][attrIndex]" filterable
+                                        placeholder="请选择">
                                         <el-option v-for="(val, valIndex) in attr.value_Select.split('，')" :key="valIndex"
                                             :label="val" :value="val">
                                         </el-option>
@@ -66,18 +67,17 @@
             </el-col>
             <el-col :span="24" v-show="this.scheduleActive === 2">
                 <el-card class="box-card">
-                    <el-form :model="salaAttrForm" :rules="salaAttrRules" ref="salaAttrRef" label-width="100px"
+                    <el-form :model="spu" :rules="salaAttrRules" ref="salaAttrRef" label-width="100px"
                         class="demo-ruleForm">
                         <el-form-item :label="salaAttr.attr_Name" prop="name" v-for="(salaAttr, sIndex) in salaAttrData"
                             :key="salaAttr.attr_ID">
-                            <el-checkbox-group v-model="salaAttrForm[sIndex]">
+                            <el-checkbox-group v-model="dataResp.salaAttrForm[sIndex]">
                                 <el-checkbox :label="val" v-for="(val, vIndex) in salaAttr.value_Select.split('，') "
                                     :key="vIndex"
                                     v-show="vIndex !== salaAttr.value_Select.split('，').length - 1"></el-checkbox>
                                 <span>
                                     <el-button icon="el-icon-plus" size="small" @click="showInput(sIndex)">自定义</el-button>
-                                    <!-- <el-input v-model="salaAttrForm[sIndex]" placeholder="请输入内容" -->
-                                    <el-input v-model="x" placeholder="请输入内容" v-show="inputVisible[sIndex].view"
+                                    <el-input v-model="inputText" placeholder="请输入内容" v-show="inputVisible[sIndex].view"
                                         @change="changeCustom(sIndex)"></el-input>
                                 </span>
                             </el-checkbox-group>
@@ -89,16 +89,37 @@
                     </el-form>
                 </el-card>
             </el-col>
-
             <el-col :span="24" v-show="this.scheduleActive === 3">
                 <el-card class="box-card">
-                    <el-table :data="skuInfo" style="width: 100%">
-                        <el-table-column prop="date" label="日期" width="180">
+                    <el-table :data="spu.skus" style="width: 100%">
+                        <el-table-column label="属性组合">
+                            <el-table-column v-for="(item, index) in salaAttrData" :key="index" :lable="item.attr_Name"
+                                width="80">
+                                <template slot-scope="scope">
+                                    <span style="margin-left: 10px">{{ scope.row[index] }}</span>
+                                </template>
+                            </el-table-column>
                         </el-table-column>
-                        <el-table-column prop="name" label="姓名" width="180">
+                        <el-table-column label="商品名称" width="120">
+                            <template slot-scope="scope">
+                                <el-input v-model="spu.goodsName"></el-input>
+                            </template>
                         </el-table-column>
-                        <el-table-column prop="address" label="地址">
+                        <!-- <el-table-column prop="goodsName" label="标题" width="120">
+                            <template slot-scope="scope">
+                                <el-input v-model="x"></el-input>
+                            </template>
                         </el-table-column>
+                        <el-table-column prop="goodsName" label="副标题" width="120">
+                            <template slot-scope="scope">
+                                <el-input v-model="x"></el-input>
+                            </template>
+                        </el-table-column>
+                        <el-table-column prop="price" label="价格" width="120">
+                            <template slot-scope="scope">
+                                <el-input v-model="x"></el-input>
+                            </template>
+                        </el-table-column> -->
                     </el-table>
                 </el-card>
             </el-col>
@@ -119,14 +140,31 @@ export default {
     components: {},
     data() {
         return {
-            x: '',
             scheduleActive: 0,
-            goodsBaseAttrForm: {
+            dataResp: {
+                specificationsForm: {
+                    0: {},
+                    1: {},
+                    2: {},
+                    3: {},
+                    4: {},
+                    5: {},
+                    6: {},
+                },
+                salaAttrForm: {
+                    0: [],
+                    1: [],
+                    2: [],
+                },
+            },
+            spu: {
                 goodsName: '',
                 goodsDesc: "",
                 classification: '',
                 weight: "0.00",
+                skus: [],
             },
+            da: [],
             goodsBaseAttrRules: {
 
             },
@@ -136,29 +174,13 @@ export default {
                 label: 'Name',
                 children: 'children'
             },
-
             attrGroup: [],
-            specificationsForm: {
-                0: {},
-                1: {},
-                2: {},
-                3: {},
-                4: {},
-                5: {},
-                6: {},
-            },
             specificationsRules: {
 
             },
-
-            salaAttrForm: {
-                0: [],
-                1: [],
-                2: [],
-            },
+            inputText: '',
             salaAttrData: [],
             salaAttrRules: {},
-
             inputVisible: [
                 { view: false },
                 { view: false },
@@ -166,7 +188,6 @@ export default {
                 { view: false },
 
             ],
-            skuInfo: ''
         }
     },
     create() { },
@@ -186,18 +207,18 @@ export default {
 
                     break;
                 case 1:
-                    this.$axios.post(`/adminAPI/goods/getGroupByxflID/${this.goodsBaseAttrForm.classification[2]}`).then(res => {
+                    this.$axios.post(`/adminAPI/goods/getGroupByxflID/${this.spu.classification[2]}`).then(res => {
                         this.attrGroup = res.data.data
                     })
                     break;
                 case 2:
-                    this.$axios.post(`/adminAPI/goods/getSalaAttrByxflID/${this.goodsBaseAttrForm.classification[2]}`).then(res => {
+                    this.$axios.post(`/adminAPI/goods/getSalaAttrByxflID/${this.spu.classification[2]}`).then(res => {
                         console.log('res:', res);
                         this.salaAttrData = res.data.data
                     })
                     break;
                 case 3:
-                    this.skuInfo = this.multiCartesian(this.salaAttrForm)
+                    this.spu.skus = this.multiCartesian(this.dataResp.salaAttrForm)
                     break;
                 case 4:
 
@@ -216,19 +237,16 @@ export default {
         },
         changeCustom(sIndex) {
             if (this.salaAttrData[sIndex].value_Select !== '') {
-                this.salaAttrData[sIndex].value_Select += this.x + '，'
+                this.salaAttrData[sIndex].value_Select += this.inputText + '，'
             }
             this.inputVisible[sIndex].view = !this.inputVisible[sIndex].view
-            this.x = ''
-            console.log("销售属性的值：", this.salaAttrData[sIndex].value_Select);
-
+            this.inputText = ''
         },
         multiCartesian(specs) {
             let max = 0;
             for (let i = 0; i < Object.keys(specs).length; i++) {
                 max += specs[i].length
             }
-            console.log("max:", Object.keys(specs) - 1);
             if (!specs || specs.length === 0) return []
             else return this.joinSpec([[]], specs, 0, Object.keys(specs).length - 1)
         },
