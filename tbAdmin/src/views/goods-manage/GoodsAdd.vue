@@ -76,10 +76,15 @@
                                     v-show="vIndex !== salaAttr.value_Select.split('，').length - 1"></el-checkbox>
                                 <span>
                                     <el-button icon="el-icon-plus" size="small" @click="showInput(sIndex)">自定义</el-button>
-                                    <el-input v-model="salaAttrForm[sIndex].add" placeholder="请输入内容"
-                                        v-show="inputVisible[sIndex].view"></el-input>
+                                    <!-- <el-input v-model="salaAttrForm[sIndex]" placeholder="请输入内容" -->
+                                    <el-input v-model="x" placeholder="请输入内容" v-show="inputVisible[sIndex].view"
+                                        @change="changeCustom(sIndex)"></el-input>
                                 </span>
                             </el-checkbox-group>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button style="margin-top: 12px;" @click="back">上一步</el-button>
+                            <el-button style="margin-top: 12px;" @click="next">下一步</el-button>
                         </el-form-item>
                     </el-form>
                 </el-card>
@@ -87,7 +92,14 @@
 
             <el-col :span="24" v-show="this.scheduleActive === 3">
                 <el-card class="box-card">
-
+                    <el-table :data="skuInfo" style="width: 100%">
+                        <el-table-column prop="date" label="日期" width="180">
+                        </el-table-column>
+                        <el-table-column prop="name" label="姓名" width="180">
+                        </el-table-column>
+                        <el-table-column prop="address" label="地址">
+                        </el-table-column>
+                    </el-table>
                 </el-card>
             </el-col>
 
@@ -153,7 +165,8 @@ export default {
                 { view: false },
                 { view: false },
 
-            ]
+            ],
+            skuInfo: ''
         }
     },
     create() { },
@@ -184,7 +197,7 @@ export default {
                     })
                     break;
                 case 3:
-
+                    this.skuInfo = this.multiCartesian(this.salaAttrForm)
                     break;
                 case 4:
 
@@ -200,6 +213,36 @@ export default {
         },
         showInput(sIndex) {
             this.inputVisible[sIndex].view = true;
+        },
+        changeCustom(sIndex) {
+            if (this.salaAttrData[sIndex].value_Select !== '') {
+                this.salaAttrData[sIndex].value_Select += this.x + '，'
+            }
+            this.inputVisible[sIndex].view = !this.inputVisible[sIndex].view
+            this.x = ''
+            console.log("销售属性的值：", this.salaAttrData[sIndex].value_Select);
+
+        },
+        multiCartesian(specs) {
+            let max = 0;
+            for (let i = 0; i < Object.keys(specs).length; i++) {
+                max += specs[i].length
+            }
+            console.log("max:", Object.keys(specs) - 1);
+            if (!specs || specs.length === 0) return []
+            else return this.joinSpec([[]], specs, 0, Object.keys(specs).length - 1)
+        },
+        joinSpec(prevProducts, specs, i, max) {
+            var currentProducts = [], currentProduct, currentSpecs = specs[i]
+            if (i > max) return prevProducts
+            prevProducts.forEach(prevProduct => {
+                currentSpecs.forEach(spec => {
+                    currentProduct = prevProduct.slice(0)
+                    currentProduct.push(spec);  //bug所在
+                    currentProducts.push(currentProduct)
+                })
+            })
+            return this.joinSpec(currentProducts, specs, ++i, max)
         },
     },
 }
